@@ -1,4 +1,5 @@
 import People from "./pages/People"
+import UserProfile from "./pages/UserProfile"
 
 function App() {
 
@@ -6,6 +7,7 @@ function App() {
   return (
     <>
       <People />
+      <UserProfile/>
     </>
   )
 }
