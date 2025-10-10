@@ -1,11 +1,11 @@
-
+import People from "./pages/People"
 
 function App() {
 
 
   return (
     <>
-      <p>Hello world!</p>
+      <People />
     </>
   )
 }
