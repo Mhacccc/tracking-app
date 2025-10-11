@@ -1,9 +1,10 @@
 import Header from '../components/Header';
+import profileImg from '../assets/profile.png'
 import './People.css';
 
 // Mock Data for the people list
 const peopleData = [
-  { id: 1, name: 'Eman', percentage: 89, braceletOn: true, avatar: 'https://i.pravatar.cc/150?u=eman' },
+  { id: 1, name: 'Eman', percentage: 89, braceletOn: true, avatar: profileImg },
   { id: 2, name: 'Eliza', percentage: 43, braceletOn: true, avatar: 'https://i.pravatar.cc/150?u=eliza' },
   { id: 3, name: 'Cyrus', percentage: 70, braceletOn: false, avatar: 'https://i.pravatar.cc/150?u=cyrus' },
   { id: 4, name: 'Mhac', percentage: 24, braceletOn: true, avatar: 'https://i.pravatar.cc/150?u=mhac' },
