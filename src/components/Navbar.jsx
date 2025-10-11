@@ -63,7 +63,7 @@ function Navbar() {
 
 				<Link to="/report" className={`nav-item ${active === 'report' ? 'active' : ''}`}>
 					<ReportIcon />
-					<span>Health Report</span>
+					<span>Incident Report</span>
 				</Link>
 			</footer>
 		</>
