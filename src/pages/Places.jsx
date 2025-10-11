@@ -1,6 +1,8 @@
 const Places = () => {
+
   return (
-    <div>
+    
+    <div>   
       Hello Places!
     </div>
   );

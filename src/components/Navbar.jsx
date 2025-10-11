@@ -1,16 +1,11 @@
 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-
+import Header from './Header'
 
 function Navbar() {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const BackIcon = () => (
-		<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-	);
-	const MoreIcon = () => (
-		<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-	);
+
 
 	const HomeIcon = () => (
 		<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -48,14 +43,8 @@ function Navbar() {
 
 		return (
 			<>
-				<header className="app-header">
-					<div onClick={() => navigate(-1)} style={{ cursor: 'pointer' }} aria-hidden>
-						<BackIcon />
-					</div>
-					<h1>{title}</h1>
-					<MoreIcon />
-				</header>
 
+        
 				<footer className="app-footer">
 				<Link to="/" className={`nav-item ${active === 'home' ? 'active' : ''}`}>
 					<HomeIcon active={active === 'home'}/>

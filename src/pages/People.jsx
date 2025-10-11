@@ -1,6 +1,4 @@
-
-
-
+import Header from '../components/Header';
 import './People.css';
 
 // Mock Data for the people list
@@ -20,7 +18,9 @@ const SearchIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="n
 
 function People() {
   return (
+    
     <main className="app-main page-frame">
+      <Header title={"People"}/>
       <div className="search-container">
         <input type="text" placeholder="Search Name" className="search-input" />
         <div className="search-icon">
