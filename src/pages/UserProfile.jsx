@@ -1,11 +1,10 @@
 // UserProfile.jsx
 
-// Import icons from lucide-react (or similar library)
-import { ChevronLeft, MoreVertical, Heart, MessageSquare, Phone, MapPin } from 'lucide-react'; 
+import "./UserProfile.css";
+import profileImg from "../assets/profile.png";
 
 // Import the placeholder profile image
 // Assuming the assets folder is one level up
-import profileImg from '../assets/profile.png'; 
 
 // Import the separate CSS file
 import './UserProfile.css';
