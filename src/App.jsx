@@ -6,6 +6,7 @@ import Places from "./pages/Places";
 import Notification from "./pages/Notification";
 import Report from "./pages/Report";
 import Home from "./pages/Home"
+import "./App.css"
 
 function App() {
 
@@ -21,9 +22,10 @@ function App() {
         <Route path="/report" element={<Report />} />
         <Route path="/notification" element={<Notification />} />
         <Route path="/places" element={<Places />} />
-        <Route path="/userProfile" element={<UserProfile />} />
+        <Route path="/userProfile/:userId" element={<UserProfile/>} />
       </Routes>
     </>
+
   );
 }
 

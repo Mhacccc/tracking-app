@@ -1,6 +1,8 @@
 import Header from '../components/Header';
 import profileImg from '../assets/profile.png'
 import './People.css';
+import { Link } from 'react-router-dom';
+
 
 // Mock Data for the people list
 const peopleData = [
@@ -30,8 +32,11 @@ function People() {
       </div>
 
       <ul className="people-list">
+        
         {peopleData.map(person => (
-          <li key={person.id} className="person-item">
+          <Link key={person.id} to={`/userProfile/${person.id}`} state={{ personData: person }} >
+          <li className="person-item">
+            
             <img src={person.avatar} alt={person.name} className="avatar" />
             <div className="person-details">
               <p className="person-name">{person.name}</p>
@@ -42,7 +47,9 @@ function People() {
                 Bracelet: {person.braceletOn ? 'ON' : 'OFF'}
               </p>
             </div>
+            
           </li>
+          </Link>
         ))}
       </ul>
 
