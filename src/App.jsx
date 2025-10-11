@@ -23,6 +23,7 @@ function App() {
         <Route path="/places" element={<Places />} />
         <Route path="/userProfile" element={<UserProfile />} />
       </Routes>
+      <UserProfile />
     </>
   );
 }
