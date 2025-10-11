@@ -5,7 +5,6 @@ import profileImg from "../assets/profile.png";
 
 // Import the placeholder profile image
 // Assuming the assets folder is one level up
-import profileImg from '../assets/profile.png'; 
 
 // Import the separate CSS file
 import './UserProfile.css';
