@@ -6,13 +6,26 @@ import Header from '../components/Header';
 import './Home.css';
 import { Link } from 'react-router-dom';
 
-// Import peopleData
-const peopleData = [
-  { id: 1, name: 'Eman', percentage: 89, braceletOn: true, avatar: 'https://i.pravatar.cc/150?u=eman', position: [14.5921, 120.9755] },
-  { id: 2, name: 'Eliza', percentage: 43, braceletOn: true, avatar: 'https://i.pravatar.cc/150?u=eliza', position: [14.5925, 120.9760] },
-  { id: 3, name: 'Cyrus', percentage: 70, braceletOn: false, avatar: 'https://i.pravatar.cc/150?u=cyrus', position: [14.5918, 120.9750] },
-  { id: 4, name: 'Mhac', percentage: 24, braceletOn: true, avatar: 'https://i.pravatar.cc/150?u=mhac', position: [14.5915, 120.9765] },
-];
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../config/firebase';
+
+// Transform Firestore data
+function transformFirebaseData(doc) {
+  const data = doc.data();
+  return {
+    id: doc.id,
+    name: data.name,
+    percentage: data.status?.battery || 0,
+    braceletOn: data.status?.isBraceletOn || false,
+    avatar: data.avatar,
+    position: data.status?.location ? 
+      [data.status.location.latitude, data.status.location.longitude] : 
+      [14.5921, 120.9755], // Default to TUP Manila if no location
+    pulseRate: data.status?.pulseRate,
+    lastSeen: data.status?.lastSeen,
+    sos: data.status?.sos
+  };
+}
 
 // Create a custom divIcon for each person
 const createCustomIcon = (person) => {
@@ -33,6 +46,30 @@ const createCustomIcon = (person) => {
 function Home() {
   // Center position (TUP Manila)
   const [center] = useState([14.5921, 120.9755]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const usersCollection = collection(db, 'users');
+        const querySnapshot = await getDocs(usersCollection);
+        const usersData = querySnapshot.docs.map(transformFirebaseData);
+        setUsers(usersData);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching users:', err);
+        setError('Failed to load users. Please try again later.');
+        setLoading(false);
+      }
+    }
+
+    fetchUsers();
+  }, []);
+
+  if (loading) return <div className="loading">Loading map...</div>;
+  if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="map-page">
@@ -47,7 +84,7 @@ function Home() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          {peopleData.map(person => (
+          {users.map(person => (
             <Marker 
               key={person.id} 
               position={person.position} 
