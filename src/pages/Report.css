@@ -1,0 +1,168 @@
+/* src/pages/Report.css */
+
+/* Base Styles for the Page */
+.report-page-frame {
+    min-height: 100vh;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    padding-bottom: 70px; /* Space for the fixed Navbar */
+}
+
+/* Header Adjustments for Report Page (using Header.jsx component) */
+.report-page-frame .app-header {
+    background-color: white; /* Match the design */
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.report-page-frame .app-header h1 {
+    color: #A4262C; /* Deep red for the title */
+    font-weight: 700;
+}
+
+/* Incident List Styles */
+.incident-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.incident-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e5e5e5;
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.incident-item:last-child {
+    border-bottom: none;
+}
+
+.incident-item:hover {
+    background-color: #f5f5f5;
+}
+
+.incident-details {
+    flex-grow: 1;
+}
+
+.incident-type {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #A4262C; /* Red for 'Panic Button' */
+    margin: 0;
+}
+
+.incident-date {
+    font-size: 0.9rem;
+    color: #777;
+    margin: 3px 0;
+}
+
+.incident-location {
+    font-size: 0.9rem;
+    color: #777;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80vw;
+}
+
+.incident-date-right {
+    font-size: 0.8rem;
+    color: #555;
+    margin-left: 10px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.chevron-icon {
+    color: #bbb;
+    margin-left: 10px;
+    flex-shrink: 0;
+}
+
+/* --- Report Detail Modal/Page Styles (image_20a258.png) --- */
+
+.report-detail-card {
+    background-color: white;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #999;
+}
+
+.detail-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.detail-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 10px 0 5px 0;
+}
+
+.detail-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #eee;
+}
+
+.detail-panic-text {
+    color: #A4262C;
+    font-weight: 600;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+    width: 100%;
+    text-align: center;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.detail-label {
+    font-weight: 500;
+    color: #333;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: #555;
+}
+
+.detail-value.red {
+    color: #A4262C;
+}
+
+.detail-value.green {
+    color: #4CAF50;
+}
