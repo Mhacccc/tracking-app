@@ -9,6 +9,7 @@ import "./UserProfile.css";
 const UserProfile = () => {
   const location = useLocation();
   const person = location.state?.personData;
+  console.log(person)
   if (!person) {
     return <div>No user data provided! Please go back to the people list.</div>;
   }
@@ -41,7 +42,7 @@ const UserProfile = () => {
                 
                 <div className="heart-rate-badge">
                   <Heart size={14} fill="white" color="white" className="heart-icon" />
-                  <span className="heart-rate-text">89 bpm</span>
+                  <span className="heart-rate-text">{person.pulseRate}</span>
                 </div>
             </div>
         </section>
@@ -53,7 +54,7 @@ const UserProfile = () => {
                 <div className="status-cards-container">
                     <div className="status-card">
                         <span className="card-label">Battery:</span>
-                        <span className="card-value green-text">{person.percentage}%</span>
+                        <span className="card-value green-text">{person.battery}%</span>
                     </div>
 
                     <div className="status-card">

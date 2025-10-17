@@ -11,13 +11,15 @@ import { db } from '../config/firebase';
 
 // Transform Firestore data
 function transformFirebaseData(doc) {
+  
   const data = doc.data();
+  console.log(data)
   return {
     id: doc.id,
     name: data.name,
     percentage: data.status?.battery || 0,
     braceletOn: data.status?.isBraceletOn || false,
-    avatar: data.avatar,
+    avatar: data.avatar|| 'https://i.pinimg.com/originals/98/1d/6b/981d6b2e0ccb5e968a0618c8d47671da.jpg',
     position: data.status?.location ? 
       [data.status.location.latitude, data.status.location.longitude] : 
       [14.5921, 120.9755], // Default to TUP Manila if no location
@@ -29,6 +31,7 @@ function transformFirebaseData(doc) {
 
 // Create a custom divIcon for each person
 const createCustomIcon = (person) => {
+ 
   return L.divIcon({
     className: 'custom-marker-icon',
     html: `
@@ -70,7 +73,7 @@ function Home() {
 
   if (loading) return <div className="loading">Loading map...</div>;
   if (error) return <div className="error">{error}</div>;
-
+ 
   return (
     <div className="map-page">
       <Header title="Home" />
