@@ -1,6 +1,6 @@
 import Header from '../components/Header';
-import profileImg from '../assets/profile.png'
 import './People.css';
+
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
@@ -61,7 +61,7 @@ function People() {
 
   if (loading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error">{error}</div>;
-
+    
   return (
     <main className="app-main page-frame">
       <Header title={"People"}/>
