@@ -3,16 +3,30 @@ import './People.css';
 
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { collection, getDocs, doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { 
+  collection, 
+  getDocs, 
+  query, 
+  where, 
+  onSnapshot 
+} from 'firebase/firestore';
 import { db } from '../config/firebase';
 
+
+
+  
+// 🔧 Fetch user data + their linked device status (matched by userId)
 async function fetchUserWithStatus(userId, userData) {
-
   try {
-    const deviceStatusDoc = await getDoc(doc(db, 'deviceStatus', userId));
+    // Find deviceStatus where userId == user's ID
+    const statusQuery = query(collection(db, 'deviceStatus'), where('userId', '==', userId));
+    const statusSnapshot = await getDocs(statusQuery);
     
-    const statusData = deviceStatusDoc.exists() ? deviceStatusDoc.data() : {};
-
+    let statusData = {};
+    if (!statusSnapshot.empty) {
+      statusData = statusSnapshot.docs[0].data();
+    }
+    
 
     return {
       id: userId,
@@ -26,7 +40,7 @@ async function fetchUserWithStatus(userId, userData) {
       pulseRate: statusData.pulseRate || 0,
       location: statusData.location || null,
       lastSeen: statusData.lastSeen?.toDate() || null,
-      sos: statusData.sos || false
+      sos: statusData.sos || false,
     };
   } catch (error) {
     console.error(`Error fetching device status for user ${userId}:`, error);
@@ -34,12 +48,13 @@ async function fetchUserWithStatus(userId, userData) {
   }
 }
 
-
-// Simple SVG Icons for the UI
-
-const SearchIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9e9e9e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;
-
-
+// Simple Search Icon
+const SearchIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9e9e9e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"></circle>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+);
 
 function People() {
   const [users, setUsers] = useState([]);
@@ -54,7 +69,7 @@ function People() {
         setLoading(true);
         const usersCollection = collection(db, 'users');
         const usersSnapshot = await getDocs(usersCollection);
-        
+
         // Fetch user data and their corresponding device status
         const usersPromises = usersSnapshot.docs.map(async (doc) => {
           const userData = doc.data();
@@ -62,9 +77,8 @@ function People() {
         });
 
         const usersWithStatus = await Promise.all(usersPromises);
-        // Filter out any null results from failed fetches
-        const validUsers = usersWithStatus.filter(user => user !== null);
-        
+        const validUsers = usersWithStatus.filter((user) => user !== null);
+
         setUsers(validUsers);
         setLoading(false);
       } catch (err) {
@@ -76,27 +90,30 @@ function People() {
 
     fetchUsers();
 
-    // Set up real-time listener for device status updates
+    // 🔥 Real-time listener for deviceStatus collection
     const unsubscribeDeviceStatus = onSnapshot(
       collection(db, 'deviceStatus'),
-      async (snapshot) => {
+      (snapshot) => {
         try {
           const updates = {};
           const updatingSet = new Set();
-          
+
           snapshot.docChanges().forEach((change) => {
-            if (change.type === 'modified') {
-              updates[change.doc.id] = change.doc.data();
-              updatingSet.add(change.doc.id);
+            const data = change.doc.data();
+            if (change.type === 'modified' || change.type === 'added') {
+              // ✅ Use userId field as key to match with users
+              if (data.userId) {
+                updates[data.userId] = data;
+                updatingSet.add(data.userId);
+              }
             }
           });
 
-          // Show loading state for updating users
           setUpdatingUsers(updatingSet);
 
-          // Update users array with new device status
-          setUsers(currentUsers => 
-            currentUsers.map(user => {
+          // Update user states
+          setUsers((currentUsers) =>
+            currentUsers.map((user) => {
               const deviceUpdate = updates[user.id];
               if (deviceUpdate) {
                 const lastSeen = deviceUpdate.lastSeen?.toDate() || null;
@@ -108,23 +125,23 @@ function People() {
                   location: deviceUpdate.location || null,
                   lastSeen,
                   sos: deviceUpdate.sos || false,
-                  isOnline: lastSeen ? 
-                    (new Date().getTime() - lastSeen.getTime()) < 5 * 60 * 1000 // 5 minutes
-                    : false
+                  isOnline: lastSeen
+                    ? new Date().getTime() - lastSeen.getTime() < 5 * 60 * 1000
+                    : false,
                 };
               }
               return user;
             })
           );
 
-          // Clear loading state after update
+          // Clear updating indicator after short delay
           setTimeout(() => {
-            setUpdatingUsers(current => {
+            setUpdatingUsers((current) => {
               const newSet = new Set(current);
-              updatingSet.forEach(id => newSet.delete(id));
+              updatingSet.forEach((id) => newSet.delete(id));
               return newSet;
             });
-          }, 500); // Short delay to show loading state
+          }, 500);
         } catch (err) {
           console.error('Error handling device status update:', err);
           setError('Error updating device status. Some information may be outdated.');
@@ -136,25 +153,19 @@ function People() {
       }
     );
 
-    // Cleanup subscription
     return () => unsubscribeDeviceStatus();
   }, []);
 
   const sortAndFilterUsers = (users, query) => {
-    const filtered = users.filter(user =>
+    const filtered = users.filter((user) =>
       user.name.toLowerCase().includes(query.toLowerCase())
     );
 
     return filtered.sort((a, b) => {
-      // SOS users first
       if (a.sos && !b.sos) return -1;
       if (!a.sos && b.sos) return 1;
-
-      // Then online users (bracelet on)
       if (a.braceletOn && !b.braceletOn) return -1;
       if (!a.braceletOn && b.braceletOn) return 1;
-
-      // Finally sort by name
       return a.name.localeCompare(b.name);
     });
   };
@@ -163,14 +174,14 @@ function People() {
 
   if (loading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error">{error}</div>;
-    
+
   return (
     <main className="app-main page-frame">
-      <Header title={"People"}/>
+      <Header title={'People'} />
       <div className="search-container">
-        <input 
-          type="text" 
-          placeholder="Search Name" 
+        <input
+          type="text"
+          placeholder="Search Name"
           className="search-input"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -181,31 +192,34 @@ function People() {
       </div>
 
       <ul className="people-list">
-        {filteredUsers.map(person => (
-          <Link key={person.id} to={`/userProfile/${person.id}`} state={{ personData: person }} >
-          <li className={`person-item ${person.sos ? 'sos' : ''} ${updatingUsers.has(person.id) ? 'updating' : ''}`}>
-            <div className={`status-indicator ${person.isOnline ? 'online' : 'offline'}`} />
-            <img src={person.avatar} alt={person.name} className="avatar" />
-            <div className="person-details">
-              <p className="person-name">{person.name}</p>
-              {person.sos && <span className="sos-badge">SOS</span>}
-            </div>
-            <div className="person-status">
-              <p className="percentage">{person.battery}%</p>
-              <p className="bracelet-status">
-                Bracelet: {person.braceletOn ? 'ON' : 'OFF'}
-              </p>
-              {person.lastSeen && (
-                <p className="last-seen">
-                  Last seen: {new Date(person.lastSeen).toLocaleTimeString()}
+        {filteredUsers.map((person) => (
+          <Link key={person.id} to={`/userProfile/${person.id}`} state={{ personData: person }}>
+            <li
+              className={`person-item ${person.sos ? 'sos' : ''} ${
+                updatingUsers.has(person.id) ? 'updating' : ''
+              }`}
+            >
+              <div className={`status-indicator ${person.isOnline ? 'online' : 'offline'}`} />
+              <img src={person.avatar} alt={person.name} className="avatar" />
+              <div className="person-details">
+                <p className="person-name">{person.name}</p>
+                
+              </div>
+              <div className="person-status">
+                <p className="percentage">{person.battery}%</p>
+                <p className="bracelet-status">
+                  Bracelet: {person.braceletOn ? 'ON' : 'OFF'}
                 </p>
-              )}
-            </div>
-          </li>
+                {person.lastSeen && (
+                  <p className="last-seen">
+                    Last seen: {new Date(person.lastSeen).toLocaleTimeString()}
+                  </p>
+                )}
+              </div>
+            </li>
           </Link>
         ))}
       </ul>
-
     </main>
   );
 }
