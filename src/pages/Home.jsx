@@ -97,7 +97,7 @@ const createCustomIcon = (person) =>
 /* ---------------------- Component ---------------------- */
 
 function Home() {
-  const [center] = useState([14.5921, 120.9755]);
+  const [center,setCenter] = useState([14.5921, 120.9755]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -121,6 +121,19 @@ function Home() {
         });
 
         const merged = usersSnap.docs.map((u) => buildUserWithDevice(u, deviceMap));
+        
+        // Set center to the first user with a valid location
+        const userWithLocation = merged.find(user => 
+          Array.isArray(user.position) && 
+          user.position.length === 2 && 
+          !isNaN(user.position[0]) && 
+          !isNaN(user.position[1])
+        );
+        
+        if (userWithLocation) {
+          setCenter(userWithLocation.position);
+        }
+        
         setUsers(merged);
         setLoading(false);
 
@@ -161,6 +174,10 @@ function Home() {
               }
               // merge new device data into user
               const loc = parseLocation(dd.location);
+              // Update center only if the user is online and has a valid location
+              if (dd.isBraceletOn && Array.isArray(loc) && loc.length === 2 && !isNaN(loc[0]) && !isNaN(loc[1])) {
+                setCenter(loc);
+              }
               const lastSeen = parseFirestoreDate(dd.lastSeen);
               return {
                 ...u,
@@ -186,14 +203,39 @@ function Home() {
       if (unsubDevice) unsubDevice();
     };
   }, []);
-
+  
   if (loading) return <div className="loading">Loading map...</div>;
-  console.log(users)
+
+  const getInitialCenter = () => {
+    // First, try to find an online user with SOS
+    const sosUser = users.find(u => u.sos && u.braceletOn);
+    if (sosUser?.position) return sosUser.position;
+
+    // Then, try to find any online user
+    const onlineUser = users.find(u => u.braceletOn);
+    if (onlineUser?.position) return onlineUser.position;
+
+    // Finally, try to find any user with a valid position
+    const anyUser = users.find(u => 
+      Array.isArray(u.position) && 
+      u.position.length === 2 && 
+      !isNaN(u.position[0]) && 
+      !isNaN(u.position[1])
+    );
+    if (anyUser) return anyUser.position;
+
+    // Default to TUP Manila if no valid positions found
+    return center;
+  };
+
   return (
     <div className="map-page">
       <Header title="Home" />
       <div className="map-container">
-        <MapContainer center={center} zoom={16} style={{ height: '100%', width: '100%' }}>
+        <MapContainer 
+          center={getInitialCenter()} 
+          zoom={20} 
+          style={{ height: '100%', width: '100%' }}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
