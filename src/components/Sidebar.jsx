@@ -40,14 +40,14 @@ function Sidebar() {
   return (
     <nav className="app-sidebar">
       <div className="sidebar-header">
-        <Link to="/home">
+        <Link to="/">
           <img src={logo} alt="PingMe Logo" className="sidebar-logo" />
         </Link>
       </div>
 
       <div className="sidebar-links">
         {/* These links will now use the new SidebarLink logic */}
-        <SidebarLink to="/home" icon={Home} label="Home" />
+        <SidebarLink to="/" icon={Home} label="Home" />
         <SidebarLink to="/people" icon={Users} label="People" />
         <SidebarLink to="/places" icon={Map} label="Places" />
         <SidebarLink to="/report" icon={FileText} label="Report" />

@@ -121,8 +121,6 @@ function Home() {
         });
 
         const merged = usersSnap.docs.map((u) => buildUserWithDevice(u, deviceMap));
-        
-        console.log(merged)
 
         // Set center to the first user with a valid location
         const userWithLocation = merged.find(user => 
