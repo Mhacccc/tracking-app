@@ -1,0 +1,130 @@
+/* src/pages/app/Profile.css */
+
+.profile-page-container {
+  padding: 1.5rem;
+  background-color: var(--color-bg-secondary);
+  min-height: calc(100vh - 60px); /* Full height minus TopBar */
+}
+
+.profile-page-header {
+  margin-bottom: 1.5rem;
+}
+.profile-page-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 0.25rem 0;
+}
+.profile-page-header p {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* --- Profile Card --- */
+.profile-card {
+  background-color: var(--color-bg-main);
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  overflow: hidden;
+}
+
+.profile-card-header {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+.profile-card-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 1rem;
+}
+.profile-card-info {
+  flex-grow: 1;
+}
+.profile-card-info h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+.profile-card-info p {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.change-avatar-btn {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* --- Form Styles --- */
+.profile-card-body {
+  padding: 1.5rem;
+}
+.form-divider {
+  border-top: 1px solid #e0e0e0;
+  margin: 1.5rem 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Each group takes up equal space */
+}
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+.form-group input {
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  background-color: var(--color-bg-main);
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column; /* Stack on mobile */
+  gap: 1.5rem;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+.save-changes-btn {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* --- Responsive Desktop --- */
+@media (min-width: 768px) {
+  .profile-page-container {
+    padding: 2rem;
+  }
+  .form-row {
+    flex-direction: row; /* Side-by-side on desktop */
+  }
+}

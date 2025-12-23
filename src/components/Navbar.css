@@ -1,0 +1,89 @@
+/* src/components/Navbar.css */
+
+.app-navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90px; /* Taller to accommodate floating design */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align icons to the top of the bar */
+  
+  /* This creates the floating effect */
+  max-width: 500px; /* Max width for larger screens */
+  margin: 0 auto 10px auto; /* Center it and add space at bottom */
+  
+  /* Filter for a subtle blur effect like in Figma */
+  background-color: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  
+  border-radius: 25px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.nav-items-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  width: 100%;
+  padding-top: 12px;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-basis: 20%;
+  color: var(--color-text-secondary);
+  font-size: 0.7rem; /* 10px */
+  font-weight: 500;
+}
+
+.nav-item.active {
+  color: var(--color-primary); /* Use our new brand color */
+}
+
+.nav-item svg {
+  margin-bottom: 4px;
+}
+
+/* This empty div takes up the center slot */
+.nav-item-spacer {
+  flex-basis: 20%;
+}
+
+/* --- Center Button --- */
+.nav-center-button {
+  position: absolute;
+  top: -20px; /* Lifts it *above* the navbar */
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  width: 64px;
+  height: 64px;
+  
+  background-color: var(--color-primary);
+  color: white;
+  border: 4px solid white; /* Creates the "cutout" effect */
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.nav-center-button:active {
+  transform: scale(0.95);
+}
+
+/* --- THIS IS THE RESPONSIVE MAGIC --- */
+/* Hide the mobile navbar on desktop */
+@media (min-width: 768px) {
+  .app-navbar {
+    display: none;
+  }
+}

@@ -2,7 +2,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { useState, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import Header from '../components/Header';
+
 import './Home.css';
 import { Link } from 'react-router-dom';
 import { collection, getDocs, onSnapshot } from 'firebase/firestore';
@@ -100,7 +100,7 @@ function Home() {
   const [center,setCenter] = useState([14.5921, 120.9755]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     let unsubDevice = null;
 
@@ -122,6 +122,8 @@ function Home() {
 
         const merged = usersSnap.docs.map((u) => buildUserWithDevice(u, deviceMap));
         
+        console.log(merged)
+
         // Set center to the first user with a valid location
         const userWithLocation = merged.find(user => 
           Array.isArray(user.position) && 
@@ -130,6 +132,8 @@ function Home() {
           !isNaN(user.position[1])
         );
         
+      
+
         if (userWithLocation) {
           setCenter(userWithLocation.position);
         }
@@ -230,7 +234,7 @@ function Home() {
 
   return (
     <div className="map-page">
-      <Header title="Home" />
+      
       <div className="map-container">
         <MapContainer 
           center={getInitialCenter()} 

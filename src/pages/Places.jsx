@@ -179,7 +179,7 @@ const Places = () => {
       </div>
 
       <div className="places-map-container">
-        <MapContainer center={center} zoom={20} style={{ height: "100%", width: "100%" }} whenReady={(m) => setMap(m.target)}>
+        <MapContainer center={center} zoom={20} style={{ height: "112%", width: "100%" }} whenReady={(m) => setMap(m.target)}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <Marker position={personPos} draggable={true} eventHandlers={eventHandlers}><Popup>Test Person</Popup></Marker>
           
@@ -211,5 +211,7 @@ const Places = () => {
     </div>
   );
 };
+
+
 
 export default Places;

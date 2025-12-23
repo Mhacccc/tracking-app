@@ -1,5 +1,5 @@
 // src/pages/Report.jsx
-import Header from '../components/Header';
+
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './Report.css'; // Use the new CSS file
@@ -40,7 +40,7 @@ const Report = () => {
   return (
     <div className="report-page-frame">
       {/* Passing hasFilter={true} to show the filter icon on the right */}
-      <Header title="Incident Report" hasFilter={true} /> 
+
       
       <main className="app-main">
         <ul className="incident-list">

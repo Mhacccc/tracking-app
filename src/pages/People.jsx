@@ -1,4 +1,4 @@
-import Header from '../components/Header';
+
 import './People.css';
 
 import { Link } from 'react-router-dom';
@@ -177,7 +177,6 @@ function People() {
 
   return (
     <main className="app-main page-frame">
-      <Header title={'People'} />
       <div className="search-container">
         <input
           type="text"
