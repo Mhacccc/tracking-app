@@ -100,7 +100,7 @@ function Home() {
   const [center,setCenter] = useState([14.5921, 120.9755]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
     let unsubDevice = null;
 
