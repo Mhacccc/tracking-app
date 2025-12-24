@@ -18,7 +18,6 @@ function App() {
 
   return (
     <>
-      <Navbar />
       <Routes>
         <Route path="/" element={<AppLayout/>}>
           <Route index path="/" element={<Home />} />
