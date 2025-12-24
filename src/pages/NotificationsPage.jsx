@@ -1,42 +1,57 @@
 // src/pages/app/NotificationsPage.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, MoreHorizontal } from 'lucide-react';
 import './NotificationsPage.css';
 import logo from '../assets/logo.png'; // Use our logo
 
 // Mock data based on Figma
-// --- VIBE-CODE: Added the minor alerts from Report.jsx here ---
-const notifications = [
+const mockNotifications = [
   {
     id: 1,
     title: 'PingMe',
     message: "Welcome to PingMe notifications. Here, you'll receive important and updates from the App.",
     time: 'Today',
-    icon: logo, // Use our app logo
+    icon: logo,
     unread: true,
   },
   {
     id: 2, 
     title: 'Low Battery Alert', 
-    message: "Eman's bracelet is at 24%.", // From old Report.jsx
-    time: 'Apr 23', // From old Report.jsx
-    icon: logo, // We can change this later to a battery icon
+    message: "Eman's bracelet is at 24%.",
+    time: 'Apr 23',
+    icon: logo,
     unread: true,
   },
   { 
     id: 3, 
     title: 'Geofence Exit', 
-    message: "Mhac left 'TUP Gate 3'.", // From old Report.jsx
-    time: 'Apr 22', // From old Report.jsx
-    icon: logo, // We can change this later to a map icon
+    message: "Mhac left 'TUP Gate 3'.",
+    time: 'Apr 22',
+    icon: logo,
     unread: false,
   },
-  // We can add more alerts here later
 ];
+
+const GEOFENCE_ALERTS_KEY = "pingme_geofence_alerts";
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState(mockNotifications);
+
+  useEffect(() => {
+    // Load geofence alerts from localStorage
+    const savedAlerts = localStorage.getItem(GEOFENCE_ALERTS_KEY);
+    const geofenceAlerts = savedAlerts ? JSON.parse(savedAlerts) : [];
+
+    // Combine geofence alerts with mock notifications
+    const dynamicNotifications = [
+      ...geofenceAlerts,
+      ...mockNotifications,
+    ];
+
+    setNotifications(dynamicNotifications);
+  }, []);
 
   return (
     <div className="notifications-page">

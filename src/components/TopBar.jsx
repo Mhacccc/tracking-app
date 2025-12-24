@@ -14,7 +14,7 @@ const TopBar = () => {
   const navigate = useNavigate();
 
   // --- MODIFIED: Update handlers ---
-  const handleOpenNotifications = () => navigate('/notification');
+  const handleOpenNotifications = () => navigate('/notifications');
   const handleOpenCircles = () => setIsCirclesModalOpen(true);
 
   return (

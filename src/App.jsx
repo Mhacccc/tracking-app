@@ -25,7 +25,7 @@ function App() {
           <Route path="people" element={<People />} />
           <Route path="report" element={<Report />} />
           <Route path="report/:incidentId" element={<ReportDetail />} /> 
-          <Route path="notification" element={<NotificationsPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="places" element={<Places />} />
           <Route path="profile" element={<Profile />} />
           <Route path="userProfile/:userId" element={<UserProfile/>} />

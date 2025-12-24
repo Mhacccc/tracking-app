@@ -13,6 +13,8 @@ import "leaflet-draw/dist/leaflet.draw.css";
 import "./Places.css";
 import { useState, useRef, useEffect, useMemo } from "react";
 import L from "leaflet";
+import { collection, getDocs, onSnapshot } from "firebase/firestore";
+import { db } from "../config/firebase";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -22,11 +24,88 @@ L.Icon.Default.mergeOptions({
 });
 
 const LOCAL_STORAGE_KEY = "pingme_geofences";
+const GEOFENCE_ALERTS_KEY = "pingme_geofence_alerts";
+
+/* ---------------------- Helpers ---------------------- */
+
+// Parse Firestore timestamps from SDK or REST format into JS Date (or null)
+function parseFirestoreDate(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value?.toDate === 'function') return value.toDate();
+  if (value?.timestampValue) return new Date(value.timestampValue);
+  if (typeof value === 'string') return new Date(value);
+  return null;
+}
+
+// Get latitude/longitude from different shapes
+function parseLocation(locationField) {
+  if (locationField?.arrayValue?.values) {
+    const vals = locationField.arrayValue.values;
+    const lat = vals[0]?.doubleValue ?? null;
+    const lng = vals[1]?.doubleValue ?? null;
+    if (lat !== null && lng !== null) return [lat, lng];
+  }
+
+  if (typeof locationField === 'object' && locationField !== null) {
+    if ('latitude' in locationField && 'longitude' in locationField) {
+      return [locationField.latitude, locationField.longitude];
+    }
+    if ('lat' in locationField && 'lng' in locationField) {
+      return [locationField.lat, locationField.lng];
+    }
+  }
+
+  if (Array.isArray(locationField) && locationField.length >= 2) {
+    return [locationField[0], locationField[1]];
+  }
+
+  return [14.5921, 120.9755];
+}
+
+// Build a user object merged with deviceStatus data
+function buildUserWithDevice(userDoc, deviceMap) {
+  const userData = userDoc.data();
+  const deviceData = deviceMap.get(userDoc.id) || {};
+
+  const location = parseLocation(deviceData.location);
+  const lastSeenDate = parseFirestoreDate(deviceData.lastSeen);
+
+  return {
+    id: userDoc.id,
+    name: userData.name || 'Unnamed User',
+    avatar:
+      userData.avatar ||
+      'https://i.pinimg.com/originals/98/1d/6b/981d6b2e0ccb5e968a0618c8d47671da.jpg',
+    battery: Number(deviceData.battery ?? 0),
+    braceletOn: Boolean(deviceData.isBraceletOn ?? false),
+    pulseRate: deviceData.pulseRate ?? null,
+    lastSeen: lastSeenDate,
+    sos: (deviceData.sos && (deviceData.sos.active ?? deviceData.sos)) || false,
+    position: location,
+  };
+}
+
+// Create custom marker icon for users
+const createCustomIcon = (person) =>
+  L.divIcon({
+    className: 'custom-marker-icon',
+    html: `
+      <div class="marker-content">
+        <img src="${person.avatar}" alt="${person.name}" class="marker-image" />
+        <div class="marker-status ${person.braceletOn ? 'online' : 'offline'}"></div>
+      </div>
+    `,
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -40],
+  });
 
 const Places = () => {
   const [center] = useState([14.5995, 120.9842]);
   const [map, setMap] = useState(null);
-  const [personPos, setPersonPos] = useState({ lat: 14.5995, lng: 120.9842 });
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeAlerts, setActiveAlerts] = useState([]);
   const [geofences, setGeofences] = useState(() => {
     const savedZones = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -37,18 +116,144 @@ const Places = () => {
   const [pendingLayerId, setPendingLayerId] = useState(null);
   const featureGroupRef = useRef(null);
   const pendingLayerRef = useRef(null);
+  const alertedUsersRef = useRef(new Set());
 
+  // Fetch real users from Firebase on mount
+  useEffect(() => {
+    let unsubDevice = null;
+
+    async function initialLoad() {
+      try {
+        const [usersSnap, deviceSnap] = await Promise.all([
+          getDocs(collection(db, 'users')),
+          getDocs(collection(db, 'deviceStatus')),
+        ]);
+
+        const deviceMap = new Map();
+        deviceSnap.docs.forEach((d) => {
+          const dd = d.data();
+          const uid = dd.userId || dd.userID || null;
+          if (uid) deviceMap.set(uid, dd);
+        });
+
+        const merged = usersSnap.docs.map((u) => buildUserWithDevice(u, deviceMap));
+        setUsers(merged);
+        setLoading(false);
+
+        // Subscribe to real-time deviceStatus updates
+        unsubDevice = onSnapshot(collection(db, 'deviceStatus'), (snapshot) => {
+          const updatesByUser = new Map();
+          snapshot.docChanges().forEach((change) => {
+            const dd = change.doc.data();
+            const uid = dd.userId || dd.userID || null;
+            if (!uid) return;
+            if (change.type === 'added' || change.type === 'modified') {
+              updatesByUser.set(uid, dd);
+            }
+            if (change.type === 'removed') {
+              updatesByUser.set(uid, null);
+            }
+          });
+
+          if (updatesByUser.size === 0) return;
+
+          setUsers((current) =>
+            current.map((u) => {
+              if (!updatesByUser.has(u.id)) return u;
+              const dd = updatesByUser.get(u.id);
+              if (dd === null) {
+                return {
+                  ...u,
+                  battery: 0,
+                  braceletOn: false,
+                  pulseRate: null,
+                  lastSeen: null,
+                  sos: false,
+                };
+              }
+              const loc = parseLocation(dd.location);
+              const lastSeen = parseFirestoreDate(dd.lastSeen);
+              return {
+                ...u,
+                battery: Number(dd.battery ?? u.battery),
+                braceletOn: Boolean(dd.isBraceletOn ?? u.braceletOn),
+                pulseRate: dd.pulseRate ?? u.pulseRate,
+                lastSeen,
+                sos: (dd.sos && (dd.sos.active ?? dd.sos)) || false,
+                position: loc,
+              };
+            })
+          );
+        });
+      } catch (err) {
+        console.error('Error loading users/deviceStatus:', err);
+        setLoading(false);
+      }
+    }
+
+    initialLoad();
+
+    return () => {
+      if (unsubDevice) unsubDevice();
+    };
+  }, []);
+
+  // Check geofences for all users and trigger alerts
   useEffect(() => {
     const currentAlerts = [];
-    geofences.forEach((zone) => {
-      const personLatLng = L.latLng(personPos.lat, personPos.lng);
-      const circleCenter = L.latLng(zone.latlngs.lat, zone.latlngs.lng);
-      if (personLatLng.distanceTo(circleCenter) <= zone.radius) {
-        currentAlerts.push(zone.name);
-      }
+    const newGeofenceAlerts = [];
+
+    // Load existing alerts to check for duplicates
+    const existingAlerts = localStorage.getItem(GEOFENCE_ALERTS_KEY);
+    const parsedAlerts = existingAlerts ? JSON.parse(existingAlerts) : [];
+
+    users.forEach((user) => {
+      if (!Array.isArray(user.position) || user.position.length !== 2) return;
+
+      const userLatLng = L.latLng(user.position[0], user.position[1]);
+
+      geofences.forEach((zone) => {
+        const circleCenter = L.latLng(zone.latlngs.lat, zone.latlngs.lng);
+        const distance = userLatLng.distanceTo(circleCenter);
+
+        if (distance <= zone.radius) {
+          currentAlerts.push(`${user.name} entered ${zone.name}`);
+          const alertKey = `${user.id}-${zone.id}`;
+
+          // Track geofence hit only once per user-zone combination
+          if (!alertedUsersRef.current.has(alertKey)) {
+            alertedUsersRef.current.add(alertKey);
+            console.warn(`🚨 ${user.name} entered geofence: ${zone.name}`);
+
+            // Check if this exact alert already exists to prevent duplicates on refresh
+            const alertMessage = `${user.name} entered ${zone.name}`;
+            const alertExists = parsedAlerts.some((alert) => alert.message === alertMessage);
+
+            if (!alertExists) {
+              // Create notification alert object
+              const alertNotification = {
+                id: Date.now() + Math.random(), // Unique ID
+                title: 'Geofence Alert',
+                message: alertMessage,
+                time: new Date().toLocaleTimeString(),
+                icon: user.avatar,
+                unread: true,
+              };
+              newGeofenceAlerts.push(alertNotification);
+            }
+          }
+        }
+      });
     });
+
+    // Save geofence alerts to localStorage
+    if (newGeofenceAlerts.length > 0) {
+      const updatedAlerts = [...newGeofenceAlerts, ...parsedAlerts];
+      localStorage.setItem(GEOFENCE_ALERTS_KEY, JSON.stringify(updatedAlerts));
+    }
+
     setActiveAlerts(currentAlerts);
-  }, [personPos, geofences]);
+  }, [users, geofences]);
 
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(geofences));
@@ -131,9 +336,9 @@ const Places = () => {
     pendingLayerRef.current = null;
   };
 
-  const eventHandlers = useMemo(() => ({
-    dragend(e) { setPersonPos(e.target.getLatLng()); },
-  }), []);
+
+
+  if (loading) return <div className="loading">Loading map and users...</div>;
 
   return (
     <div className="places-page-container">
@@ -179,9 +384,29 @@ const Places = () => {
       </div>
 
       <div className="places-map-container">
-        <MapContainer center={center} zoom={20} style={{ height: "112%", width: "100%" }} whenReady={(m) => setMap(m.target)}>
+        <MapContainer center={users[0].position} zoom={20} style={{ height: "112%", width: "100%" }} whenReady={(m) => setMap(m.target)}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <Marker position={personPos} draggable={true} eventHandlers={eventHandlers}><Popup>Test Person</Popup></Marker>
+          
+          {/* Render real user markers */}
+          {users.map((user) => (
+            <Marker 
+              key={user.id} 
+              position={user.position} 
+              icon={createCustomIcon(user)}
+            >
+              <Popup className="custom-popup">
+                <div className="popup-content">
+                  <img src={user.avatar} alt={user.name} className="popup-image" />
+                  <div className="popup-info">
+                    <h3>{user.name}</h3>
+                    <p>Battery: {user.battery}%</p>
+                    <p>Status: {user.braceletOn ? '🟢 Online' : '🔴 Offline'}</p>
+                    <p>Pulse: {user.pulseRate ?? '—'}</p>
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
           
           <FeatureGroup ref={featureGroupRef}>
             <EditControl
@@ -199,7 +424,7 @@ const Places = () => {
             {geofences.map((zone) => (
               <Circle
                 key={zone.id}
-                id={zone.id} // Pass the ID to the circle options
+                id={zone.id}
                 center={zone.latlngs}
                 radius={zone.radius}
                 pathOptions={{ color: "#A4262C", fillColor: "#A4262C", fillOpacity: 0.2 }}
