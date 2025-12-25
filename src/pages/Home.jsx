@@ -1,98 +1,12 @@
+
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { useState, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-
 import './Home.css';
 import { Link } from 'react-router-dom';
 import { collection, getDocs, onSnapshot } from 'firebase/firestore';
-import { db } from '../config/firebase';
-
-/* ---------------------- Helpers ---------------------- */
-
-// Parse Firestore timestamps from SDK or REST format into JS Date (or null)
-function parseFirestoreDate(value) {
-  if (!value) return null;
-  // JS Date already
-  if (value instanceof Date) return value;
-  // Firestore Timestamp (has toDate)
-  if (typeof value?.toDate === 'function') return value.toDate();
-  // REST timestampValue
-  if (value?.timestampValue) return new Date(value.timestampValue);
-  // plain ISO string
-  if (typeof value === 'string') return new Date(value);
-  return null;
-}
-
-// Get latitude/longitude from different shapes:
-function parseLocation(locationField) {
-  // case 1: REST API arrayValue: { arrayValue: { values: [{ doubleValue: lat }, { doubleValue: lng }] } }
-  if (locationField?.arrayValue?.values) {
-    const vals = locationField.arrayValue.values;
-    const lat = vals[0]?.doubleValue ?? null;
-    const lng = vals[1]?.doubleValue ?? null;
-    if (lat !== null && lng !== null) return [lat, lng];
-  }
-
-  // case 2: SDK style as map { latitude: number, longitude: number }
-  if (typeof locationField === 'object' && locationField !== null) {
-    // support both { latitude, longitude } and { lat, lng } and plain array
-    if ('latitude' in locationField && 'longitude' in locationField) {
-      return [locationField.latitude, locationField.longitude];
-    }
-    if ('lat' in locationField && 'lng' in locationField) {
-      return [locationField.lat, locationField.lng];
-    }
-  }
-
-  // case 3: plain array [lat, lng]
-  if (Array.isArray(locationField) && locationField.length >= 2) {
-    return [locationField[0], locationField[1]];
-  }
-
-  // fallback default to TUP Manila
-  return [14.5921, 120.9755];
-}
-
-// Build a user object merged with deviceStatus data
-function buildUserWithDevice(userDoc, deviceMap) {
-  const userData = userDoc.data();
-  // deviceMap keyed by userId -> deviceData (pick first device if multiple)
-  const deviceData = deviceMap.get(userDoc.id) || {};
-
-  const location = parseLocation(deviceData.location);
-  const lastSeenDate = parseFirestoreDate(deviceData.lastSeen);
-
-  return {
-    id: userDoc.id,
-    name: userData.name || 'Unnamed User',
-    avatar:
-      userData.avatar ||
-      'https://i.pinimg.com/originals/98/1d/6b/981d6b2e0ccb5e968a0618c8d47671da.jpg',
-    battery: Number(deviceData.battery ?? 0),
-    braceletOn: Boolean(deviceData.isBraceletOn ?? false),
-    pulseRate: deviceData.pulseRate ?? null,
-    lastSeen: lastSeenDate,
-    sos: (deviceData.sos && (deviceData.sos.active ?? deviceData.sos)) || false,
-    position: location,
-  };
-}
-
-/* ---------------------- Marker Icon ---------------------- */
-
-const createCustomIcon = (person) =>
-  L.divIcon({
-    className: 'custom-marker-icon',
-    html: `
-      <div class="marker-content">
-        <img src="${person.avatar}" alt="${person.name}" class="marker-image" />
-        <div class="marker-status ${person.braceletOn ? 'online' : 'offline'}"></div>
-      </div>
-    `,
-    iconSize: [40, 40],
-    iconAnchor: [20, 40],
-    popupAnchor: [0, -40],
-  });
+import { db } from '../config/firebaseConfig';
+import { parseFirestoreDate, parseLocation, buildUserWithDevice, createCustomIcon } from '../utils/mapHelpers';
 
 /* ---------------------- Component ---------------------- */
 
@@ -206,6 +120,7 @@ function Home() {
     };
   }, []);
   
+
   if (loading) return <div className="loading">Loading map...</div>;
 
   const getInitialCenter = () => {
@@ -230,9 +145,9 @@ function Home() {
     return center;
   };
 
+
   return (
     <div className="map-page">
-      
       <div className="map-container">
         <MapContainer 
           center={getInitialCenter()} 
@@ -242,7 +157,6 @@ function Home() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-
           {users.map((person) => (
             <Marker key={person.id} position={person.position} icon={createCustomIcon(person)}>
               <Popup className="custom-popup">

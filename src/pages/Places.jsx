@@ -1,4 +1,5 @@
 // src/pages/app/Places.jsx
+
 import {
   MapContainer,
   TileLayer,
@@ -11,10 +12,11 @@ import { EditControl } from "react-leaflet-draw";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "./Places.css";
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import L from "leaflet";
 import { collection, getDocs, onSnapshot } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { db } from "../config/firebaseConfig";
+import { parseFirestoreDate, parseLocation, buildUserWithDevice, createCustomIcon } from '../utils/mapHelpers';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -28,81 +30,9 @@ const GEOFENCE_ALERTS_KEY = "pingme_geofence_alerts";
 
 /* ---------------------- Helpers ---------------------- */
 
-// Parse Firestore timestamps from SDK or REST format into JS Date (or null)
-function parseFirestoreDate(value) {
-  if (!value) return null;
-  if (value instanceof Date) return value;
-  if (typeof value?.toDate === 'function') return value.toDate();
-  if (value?.timestampValue) return new Date(value.timestampValue);
-  if (typeof value === 'string') return new Date(value);
-  return null;
-}
-
-// Get latitude/longitude from different shapes
-function parseLocation(locationField) {
-  if (locationField?.arrayValue?.values) {
-    const vals = locationField.arrayValue.values;
-    const lat = vals[0]?.doubleValue ?? null;
-    const lng = vals[1]?.doubleValue ?? null;
-    if (lat !== null && lng !== null) return [lat, lng];
-  }
-
-  if (typeof locationField === 'object' && locationField !== null) {
-    if ('latitude' in locationField && 'longitude' in locationField) {
-      return [locationField.latitude, locationField.longitude];
-    }
-    if ('lat' in locationField && 'lng' in locationField) {
-      return [locationField.lat, locationField.lng];
-    }
-  }
-
-  if (Array.isArray(locationField) && locationField.length >= 2) {
-    return [locationField[0], locationField[1]];
-  }
-
-  return [14.5921, 120.9755];
-}
-
-// Build a user object merged with deviceStatus data
-function buildUserWithDevice(userDoc, deviceMap) {
-  const userData = userDoc.data();
-  const deviceData = deviceMap.get(userDoc.id) || {};
-
-  const location = parseLocation(deviceData.location);
-  const lastSeenDate = parseFirestoreDate(deviceData.lastSeen);
-
-  return {
-    id: userDoc.id,
-    name: userData.name || 'Unnamed User',
-    avatar:
-      userData.avatar ||
-      'https://i.pinimg.com/originals/98/1d/6b/981d6b2e0ccb5e968a0618c8d47671da.jpg',
-    battery: Number(deviceData.battery ?? 0),
-    braceletOn: Boolean(deviceData.isBraceletOn ?? false),
-    pulseRate: deviceData.pulseRate ?? null,
-    lastSeen: lastSeenDate,
-    sos: (deviceData.sos && (deviceData.sos.active ?? deviceData.sos)) || false,
-    position: location,
-  };
-}
-
-// Create custom marker icon for users
-const createCustomIcon = (person) =>
-  L.divIcon({
-    className: 'custom-marker-icon',
-    html: `
-      <div class="marker-content">
-        <img src="${person.avatar}" alt="${person.name}" class="marker-image" />
-        <div class="marker-status ${person.braceletOn ? 'online' : 'offline'}"></div>
-      </div>
-    `,
-    iconSize: [40, 40],
-    iconAnchor: [20, 40],
-    popupAnchor: [0, -40],
-  });
 
 const Places = () => {
-  const [center] = useState([14.5995, 120.9842]);
+ 
   const [map, setMap] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
