@@ -1,229 +1,203 @@
-/* UserProfile.css (Optimized for Web/Desktop) */
+/* src/pages/app/UserProfile.css (Re-designed for Simplicity) */
 
-/* --- Global & Typography --- */
-:root {
-    --color-green: #00C853; 
-    --color-red: #e74c3c; 
-    --color-separator: #e5e5e5; 
-    --color-background: #f8f9fb; /* Light background for web */
-    --color-card-bg: #ffffff; /* White card background */
-    --font-primary: 'Inter', 'Poppins', sans-serif;
-    --max-card-width: 900px; /* Max width of the entire profile card */
-    --padding-base: 25px;
+.profile-page-container {
+  padding: 0 0 100px 0; /* Padding for navbar */
+  background-color: var(--color-bg-secondary); /* UPDATED */
+  min-height: 100vh;
 }
 
-body {
-    background-color: var(--color-background);
-    font-family: var(--font-primary);
-    margin: 0;
-    padding: 0;
+.profile-content {
+  max-width: 600px; /* Constrain width for readability */
+  margin: 0 auto;
 }
 
-/* --- Web Container and Layout --- */
-.web-profile-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Center content horizontally */
-    min-height: 100vh;
+/* --- 1. Hero Section --- */
+.profile-hero {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--color-bg-main); /* UPDATED */
+  border-bottom: 1px solid #e0e0e0; /* UPDATED */
+  position: relative; /* ADDED: For the back button */
 }
 
-/* --- Header / Top Bar (Full Width) --- */
-.web-header {
-    width: 100%;
-    max-width: var(--max-card-width); /* Align with the main content */
-    display: flex;
-    justify-content: space-between;
-    padding: 20px 20px 0 20px;
-    margin: 0 auto;
+.profile-avatar-wrapper {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 3px solid var(--color-bg-main); /* UPDATED */
 }
 
-.icon-button {
-    background: none;
-    border: none;
-    color: #333;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 50%;
-    transition: background-color 0.2s;
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.icon-button:hover {
-    background-color: #f0f0f0;
+.profile-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 16px 0 8px 0;
+  color: var(--color-text-primary); /* ADDED */
 }
 
-/* --- Main Profile Card (The central element) --- */
-.profile-card-web {
-    background-color: var(--color-card-bg);
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08); /* Stronger shadow for desktop */
-    width: 90%;
-    max-width: var(--max-card-width); 
-    margin: 20px auto 40px auto;
-    padding: var(--padding-base);
+.profile-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.profile-status-badge .status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
 }
 
-/* --- Hero Section (Image and Name/Badge) --- */
-.profile-hero-section {
-    display: flex;
-    align-items: center;
-    padding-bottom: 30px;
-    border-bottom: 1px solid var(--color-separator);
-    margin-bottom: 25px;
+.profile-status-badge.online {
+  background-color: #e8f5e9; /* Light green */
+  color: var(--color-alert-green);
+}
+.profile-status-badge.online .status-dot {
+  background-color: var(--color-alert-green); /* UPDATED */
 }
 
-.profile-image-container {
-    width: 100px; /* Slightly smaller on the web card */
-    height: 100px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin-right: 25px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+.profile-status-badge.offline {
+  background-color: #fbe9e7; /* Light red */
+  color: var(--color-alert-red);
+}
+.profile-status-badge.offline .status-dot {
+  background-color: var(--color-alert-red); /* UPDATED */
 }
 
-.profile-picture-mobile {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.profile-status-badge.panic {
+  background-color: #fbe9e7; /* Light red */
+  color: var(--color-alert-red);
+  font-weight: 600;
 }
 
-.profile-info-block {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+/* --- 2. Detail Sections --- */
+.profile-section {
+  margin: 20px 16px;
 }
 
-.profile-name-mobile {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0;
+.profile-section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-secondary); /* UPDATED */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px 12px;
 }
 
-.heart-rate-badge {
-    display: inline-flex;
-    align-items: center;
-    background-color: var(--color-red);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 16px;
-    margin-top: 8px;
-    font-size: 0.85rem;
-    font-weight: 500;
+.profile-list-container {
+  background-color: var(--color-bg-main); /* UPDATED */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.heart-icon {
-    margin-right: 5px;
+.profile-list-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.profile-list-container .profile-list-item:last-child {
+  border-bottom: none;
 }
 
-/* --- Detail Sections Wrapper (Status Cards & Contact List) --- */
-.detail-sections-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr; /* 1 column for status, 1.5 for contact */
-    gap: 40px;
-    padding-top: 10px;
+.item-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background-color: var(--color-bg-secondary); /* UPDATED */
+  border-radius: 8px;
+  margin-right: 16px;
+  color: var(--color-text-secondary); /* UPDATED */
 }
 
-.section-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #444;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
+.item-label {
+  flex-grow: 1;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-primary); /* UPDATED */
 }
 
-/* --- Status Cards Section --- */
-.status-section {
-    /* No specific styling needed, grid handles positioning */
+.item-value {
+  font-size: 1rem;
+  font-weight: 600;
 }
 
-.status-cards-container {
-    display: flex;
-    flex-direction: column; /* Stack vertically for a clean column look */
-    gap: 15px;
+.item-action {
+  font-size: 1.2rem;
+  color: #ccc;
+  font-weight: 300;
 }
 
-.status-card {
-    flex: none; /* Override mobile flex property */
-    background-color: var(--color-background); /* Use light background for status cards */
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: none; /* Remove shadow for cleaner look inside the main card */
-    border: 1px solid #eee;
+/* Specific Colors */
+.red-text { color: var(--color-alert-red); } /* UPDATED */
+.green-text { color: var(--color-alert-green); } /* UPDATED */
+.orange-text { color: var(--color-alert-orange); } /* UPDATED */
+
+
+/* --- 3. Location Map --- */
+.profile-map-wrapper {
+  width: 100%;
+  height: 280px; /* 👈 visible height */
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-.card-label {
-    font-size: 0.9rem;
-    color: #777;
-    margin-bottom: 5px;
+.profile-map-wrapper .leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1;
 }
 
-.card-value {
-    font-size: 2.5rem;
-    font-weight: 700;
-    line-height: 1;
+
+/* --- Mark Safe Button (from Report.css) --- */
+.mark-safe-button {
+  width: 100%;
+  padding: 12px 1.5rem;
+  margin-top: 20px; /* Space above the button */
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: var(--color-alert-green); /* UPDATED */
+  color: white;
+  transition: background-color 0.2s;
 }
 
-.green-text {
-    color: var(--color-green);
+.mark-safe-button:hover {
+  background-color: #45a049;
 }
 
-/* --- Contact List Section --- */
-.contact-section {
-    /* No specific styling needed */
+/* --- THIS IS THE FIX FOR THE BACK BUTTON --- */
+.page-back-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  padding: 5px;
+  z-index: 10;
 }
-
-.contact-list {
-    width: 100%;
-}
-
-.list-item {
-    display: flex;
-    align-items: center;
-    padding: 15px 0;
-    border-bottom: 1px solid var(--color-separator); /* Use border-bottom for list items */
-}
-
-.list-item:first-child {
-    border-top: none; /* Remove top border */
-}
-
-.list-icon {
-    color: #555;
-    margin-right: 15px;
-}
-
-.list-text {
-    font-size: 1rem;
-    color: #333;
-    font-weight: 500;
-    flex-grow: 1; /* Allow text to take space */
-}
-
-.location-item {
-    justify-content: space-between;
-}
-
-.open-map-link {
-    font-size: 0.9rem;
-    color: #3498db;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-/* --- Responsiveness for Smaller Screens (e.g., small tablets or old desktops) --- */
-@media (max-width: 768px) {
-    .profile-card-web {
-        padding: 20px;
-        margin-top: 15px;
-    }
-    
-    .detail-sections-wrapper {
-        /* Stack the status cards and contact list vertically */
-        grid-template-columns: 1fr;
-        gap: 30px;
-    }
-
-    .status-cards-container {
-        flex-direction: row; /* Switch status cards back to side-by-side */
-    }
+.page-back-btn:hover {
+  color: var(--color-primary);
 }
