@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useEffect, useRef } from 'react';
+import { createCustomIcon } from '../utils/mapHelpers';
 
 // Fix for Leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -39,7 +40,6 @@ const UserProfile = () => {
   }
 
 
-
   const isOnline = person.braceletOn;
   const batteryLevel = person.battery;
   const userPosition =
@@ -54,18 +54,6 @@ const UserProfile = () => {
   };
   const batteryColorClass = getBatteryColor(batteryLevel);
 
-  const createProfileIcon = (avatarUrl) =>
-    L.divIcon({
-      className: 'custom-marker-icon',
-      html: `
-        <div class="marker-content">
-          <img src="${avatarUrl}" alt="${person.name}" class="marker-image" />
-        </div>
-      `,
-      iconSize: [40, 40],
-      iconAnchor: [20, 40],
-      popupAnchor: [0, -40],
-    });
 
   return (
     <div className="profile-page-container">
@@ -155,7 +143,7 @@ const UserProfile = () => {
                 />
                 <Marker
                   position={userPosition}
-                  icon={createProfileIcon(person.avatar)}
+                  icon={createCustomIcon(person)}
                 />
               </MapContainer>
             </div>

@@ -6,14 +6,28 @@ import './Home.css';
 import { Link } from 'react-router-dom';
 import { collection, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
+
 import { parseFirestoreDate, parseLocation, buildUserWithDevice, createCustomIcon } from '../utils/mapHelpers';
+import { reverseGeocode } from '../utils/geocode';
 
 /* ---------------------- Component ---------------------- */
 
+
 function Home() {
-  const [center,setCenter] = useState([14.5921, 120.9755]);
+  const [center, setCenter] = useState([14.5921, 120.9755]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  // addressCache: { [userId]: addressString }
+  const [addressCache, setAddressCache] = useState({});
+  // Fetch address for a user if not already cached
+  const fetchAddress = async (user) => {
+    if (!user?.position || addressCache[user.id]) return;
+    const [lat, lng] = user.position;
+    if (isNaN(lat) || isNaN(lng)) return;
+    setAddressCache((prev) => ({ ...prev, [user.id]: 'Loading address...' }));
+    const address = await reverseGeocode(lat, lng);
+    setAddressCache((prev) => ({ ...prev, [user.id]: address || 'Address not found' }));
+  };
 
   useEffect(() => {
     let unsubDevice = null;
@@ -157,23 +171,28 @@ function Home() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          {users.map((person) => (
-            <Marker key={person.id} position={person.position} icon={createCustomIcon(person)}>
-              <Popup className="custom-popup">
-                <Link to={`/userProfile/${person.id}`} state={{ personData: person }} className="popup-content">
-                  <img src={person.avatar} alt={person.name} className="popup-image" />
-                  <div className="popup-info">
-                    <h3>{person.name}</h3>
-                    <p>Battery: {person.battery}%</p>
-                    <p>Status: {person.braceletOn ? '🟢 Online' : '🔴 Offline'}</p>
-                    <p>Pulse: {person.pulseRate ?? '—'}</p>
-                    <p>Last Seen: {person.lastSeen ? person.lastSeen.toLocaleTimeString() : '—'}</p>
-                    {person.sos && <p className="sos">🚨 SOS Active!</p>}
-                  </div>
-                </Link>
-              </Popup>
-            </Marker>
-          ))}
+          {users.map((person) => {
+            // Trigger address fetch on render if not cached
+            if (!addressCache[person.id]) fetchAddress(person);
+            return (
+              <Marker key={person.id} position={person.position} icon={createCustomIcon(person)}>
+                <Popup className="custom-popup">
+                  <Link to={`/userProfile/${person.id}`} state={{ personData: person }} className="popup-content">
+                    <img src={person.avatar} alt={person.name} className="popup-image" />
+                    <div className="popup-info">
+                      <h3>{person.name}</h3>
+                      <p>Battery: {person.battery}%</p>
+                      <p>Status: {person.braceletOn ? '🟢 Online' : '🔴 Offline'}</p>
+                      <p>Pulse: {person.pulseRate ?? '—'}</p>
+                      <p>Last Seen: {person.lastSeen ? person.lastSeen.toLocaleTimeString() : '—'}</p>
+                      <p>Location: {addressCache[person.id] || 'Loading address...'}</p>
+                      {person.sos && <p className="sos">🚨 SOS Active!</p>}
+                    </div>
+                  </Link>
+                </Popup>
+              </Marker>
+            );
+          })}
         </MapContainer>
       </div>
     </div>
