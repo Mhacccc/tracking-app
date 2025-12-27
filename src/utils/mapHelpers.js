@@ -39,6 +39,7 @@ export function buildUserWithDevice(userDoc, deviceMap) {
   const deviceData = deviceMap.get(userDoc.id) || {};
   const location = parseLocation(deviceData.location);
   const lastSeenDate = parseFirestoreDate(deviceData.lastSeen);
+  const online = isUserOnline(lastSeenDate);
   return {
     id: userDoc.id,
     name: userData.name || 'Unnamed User',
@@ -51,6 +52,7 @@ export function buildUserWithDevice(userDoc, deviceMap) {
     lastSeen: lastSeenDate,
     sos: (deviceData.sos && (deviceData.sos.active ?? deviceData.sos)) || false,
     position: location,
+    online: online,
   };
 }
 
@@ -61,10 +63,16 @@ export const createCustomIcon = (person) =>
     html: `
       <div class="marker-content">
         <img src="${person.avatar}" alt="${person.name}" class="marker-image" />
-        <div class="marker-status ${person.braceletOn ? 'online' : 'offline'}"></div>
+        <div class="marker-status ${person.online && person.braceletOn ? 'online' : 'offline'}"></div>
       </div>
     `,
     iconSize: [40, 40],
     iconAnchor: [20, 20],
     popupAnchor: [0, -40],
   });
+
+// Helper to determine if user is online based on lastSeen
+export function isUserOnline(lastSeen, thresholdMinutes = 5) {
+  if (!lastSeen) return false;
+  return new Date().getTime() - lastSeen.getTime() < thresholdMinutes * 60 * 1000;
+}
