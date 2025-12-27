@@ -1,92 +1,182 @@
-import { useLocation } from 'react-router-dom';
-import { ChevronLeft, MoreVertical, Heart, MessageSquare, Phone, MapPin } from 'lucide-react';
+// src/pages/app/UserProfile.jsx
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Heart, MessageSquare, Phone, Wifi, Battery, ChevronLeft } from 'lucide-react'; 
+import './UserProfile.css';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import { useEffect, useRef } from 'react';
 
+// Fix for Leaflet icons
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl:
+    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl:
+    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
-import "./UserProfile.css";
-
-
+// ✅ Helper component to fix map rendering issue
+const ResizeMap = () => {
+  const map = useMap();
+  useEffect(() => {
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 300);
+  }, [map]);
+  return null;
+};
 
 const UserProfile = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const person = location.state?.personData;
-  console.log(person)
+
   if (!person) {
     return <div>No user data provided! Please go back to the people list.</div>;
   }
 
+
+
+  const isOnline = person.braceletOn;
+  const batteryLevel = person.battery;
+  const userPosition =
+    person.location && Array.isArray(person.location)
+      ? person.location
+      : [14.5995, 120.9842]; // ✅ fallback to Manila if null
+
+  const getBatteryColor = (level) => {
+    if (level < 30) return 'red-text';
+    if (level < 60) return 'orange-text';
+    return 'green-text';
+  };
+  const batteryColorClass = getBatteryColor(batteryLevel);
+
+  const createProfileIcon = (avatarUrl) =>
+    L.divIcon({
+      className: 'custom-marker-icon',
+      html: `
+        <div class="marker-content">
+          <img src="${avatarUrl}" alt="${person.name}" class="marker-image" />
+        </div>
+      `,
+      iconSize: [40, 40],
+      iconAnchor: [20, 40],
+      popupAnchor: [0, -40],
+    });
+
   return (
-    <div className="web-profile-container"> 
-      
-      <header className="web-header"> 
-        <button className="icon-button back-button" aria-label="Go Back">
-          <ChevronLeft size={24} />
-        </button>
-        <button className="icon-button menu-button" aria-label="More Options">
-          <MoreVertical size={24} />
-        </button>
-      </header>
+    <div className="profile-page-container">
+      <main className="profile-content">
+        {/* --- Hero Section --- */}
+        <section className="profile-hero">
+          <button
+            className="page-back-btn"
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
+          >
+            <ChevronLeft size={28} />
+          </button>
 
-      <main className="profile-card-web">
-        
-        <section className="profile-hero-section">
-            <div className="profile-image-container">
-              <img 
-                src={person.avatar} 
-                alt="Eman's profile" 
-                className="profile-picture-mobile" 
-              />
-            </div>
-            
-            <div className="profile-info-block">
-                <h1 className="profile-name-mobile">{person.name}</h1>
-                
-                <div className="heart-rate-badge">
-                  <Heart size={14} fill="white" color="white" className="heart-icon" />
-                  <span className="heart-rate-text">{person.pulseRate}</span>
-                </div>
-            </div>
+          <div className="profile-avatar-wrapper">
+            <img
+              src={person.avatar}
+              alt={`${person.name}'s profile`}
+              className="profile-avatar-img"
+            />
+          </div>
+          <h1 className="profile-name">{person.name}</h1>
+          <div
+            className={`profile-status-badge ${
+              isOnline ? 'online' : 'offline'
+            }`}
+          >
+            <div className="status-dot"></div>
+            {isOnline ? 'Bracelet Online' : 'Bracelet Offline'}
+          </div>
         </section>
 
-        <section className="detail-sections-wrapper">
-            
-            <div className="detail-section status-section">
-                <h2 className="section-title">Status</h2>
-                <div className="status-cards-container">
-                    <div className="status-card">
-                        <span className="card-label">Battery:</span>
-                        <span className="card-value green-text">{person.battery}%</span>
-                    </div>
-
-                    <div className="status-card">
-                        <span className="card-label">Bracelet Status:</span>
-                        <span className="card-value green-text">{person.braceletOn?"On":"Off"}</span>
-                    </div>
-                </div>
+        {/* --- Device Status --- */}
+        <section className="profile-section">
+          <h2 className="profile-section-title">Device Status</h2>
+          <div className="profile-list-container">
+            <div className="profile-list-item">
+              <div className="item-icon-wrapper">
+                <Heart size={20} />
+              </div>
+              <span className="item-label">Pulse Rate</span>
+              <span className="item-value red-text">89 bpm</span>
             </div>
 
-            <div className="detail-section contact-section">
-                <h2 className="section-title">Contact & Location</h2>
-                <div className="contact-list web-list">
-                    
-                    <div className="list-item">
-                        <MessageSquare size={22} className="list-icon" />
-                        <span className="list-text">Chat with Eman</span>
-                    </div>
-                    
-                    <div className="list-item">
-                        <Phone size={22} className="list-icon" />
-                        <span className="list-text">09123456789</span>
-                    </div>
-                    
-                    <div className="list-item location-item">
-                        <MapPin size={22} className="list-icon" />
-                        <span className="list-text">TUP Manila</span>
-                        <a href="/" className="open-map-link">Open Map</a>
-                    </div>
-                </div>
+            <div className="profile-list-item">
+              <div className="item-icon-wrapper">
+                <Battery size={20} />
+              </div>
+              <span className="item-label">Bracelet Battery</span>
+              <span className={`item-value ${batteryColorClass}`}>
+                {batteryLevel}%
+              </span>
             </div>
+
+            <div className="profile-list-item">
+              <div className="item-icon-wrapper">
+                <Wifi size={20} />
+              </div>
+              <span className="item-label">Connection</span>
+              <span
+                className={`item-value ${
+                  isOnline ? 'green-text' : 'red-text'
+                }`}
+              >
+                {isOnline ? 'Connected' : 'Disconnected'}
+              </span>
+            </div>
+          </div>
         </section>
 
+        {/* --- Location & Contact --- */}
+        <section className="profile-section">
+          <h2 className="profile-section-title">Location & Contact</h2>
+          <div className="profile-list-container">
+            {/* ✅ Fixed: Map with explicit height and resize handler */}
+            <div className="profile-map-wrapper">
+              <MapContainer
+                center={userPosition}
+                zoom={15}
+                scrollWheelZoom={false}
+                style={{ width: '100%', height: '100%' }}
+              >
+                <ResizeMap />
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker
+                  position={userPosition}
+                  icon={createProfileIcon(person.avatar)}
+                />
+              </MapContainer>
+            </div>
+
+            <div className="profile-list-item">
+              <div className="item-icon-wrapper">
+                <MessageSquare size={20} />
+              </div>
+              <span className="item-label">Chat</span>
+              <span className="item-action">&gt;</span>
+            </div>
+
+            <div className="profile-list-item">
+              <div className="item-icon-wrapper">
+                <Phone size={20} />
+              </div>
+              <span className="item-label">Call</span>
+              <span className="item-action">&gt;</span>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );

@@ -64,7 +64,12 @@
 .person-item {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+  background-color: var(--color-bg-main); /* White */
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
 .avatar {

@@ -205,15 +205,12 @@ function People() {
                 
               </div>
               <div className="person-status">
-                <p className="percentage">{person.battery}%</p>
-                <p className="bracelet-status">
-                  Bracelet: {person.braceletOn ? 'ON' : 'OFF'}
-                </p>
-                {person.lastSeen && (
-                  <p className="last-seen">
-                    Last seen: {new Date(person.lastSeen).toLocaleTimeString()}
+                <p className="percentage" style={person.braceletOn?{color:'#34A853'}:{color: "#000000"}}>{person.battery}%</p>
+                <div className="safety-status-wrapper">
+                  <p className="bracelet-status">
+                    Bracelet: {person.braceletOn ? 'ON' : 'OFF'}
                   </p>
-                )}
+                </div>
               </div>
             </li>
           </Link>
