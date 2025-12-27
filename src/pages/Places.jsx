@@ -146,9 +146,13 @@ const Places = () => {
         const circleCenter = L.latLng(zone.latlngs.lat, zone.latlngs.lng);
         const distance = userLatLng.distanceTo(circleCenter);
 
-        if (distance <= zone.radius) {
+        const avatarVisualRadius = 10
+
+        if (distance <= zone.radius + avatarVisualRadius) {
           currentAlerts.push(`${user.name} entered ${zone.name}`);
           const alertKey = `${user.id}-${zone.id}`;
+
+          
 
           // Track geofence hit only once per user-zone combination
           if (!alertedUsersRef.current.has(alertKey)) {

@@ -65,6 +65,6 @@ export const createCustomIcon = (person) =>
       </div>
     `,
     iconSize: [40, 40],
-    iconAnchor: [20, 40],
+    iconAnchor: [20, 20],
     popupAnchor: [0, -40],
   });
