@@ -76,7 +76,7 @@ export const createCustomIcon = (person) =>
   });
 
 // Helper to determine if user is online based on lastSeen
-export function isUserOnline(lastSeen, thresholdMinutes = 2) {
+export function isUserOnline(lastSeen, thresholdMinutes = 1) {
   if (!lastSeen) return false;
   return new Date().getTime() - lastSeen.getTime() < thresholdMinutes * 60 * 1000;
 }

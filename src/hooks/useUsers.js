@@ -101,18 +101,22 @@ export function useUsers() {
   // Periodically refresh online status (every minute) to mark users as offline if data is stale
   useEffect(() => {
     const interval = setInterval(() => {
-      setUsers((current) =>
-        current.map((u) => {
+      setUsers((current) => {
+        let hasChanges = false;
+        const updatedUsers = current.map((u) => {
           const online = mapHelpers.isUserOnline(u.lastSeen);
-          return {
-            ...u,
-            online: online,
-            // LOGIC FIX: If user timed out (went offline), turn off bracelet status locally
-            braceletOn: online ? u.braceletOn : false,
-          };
-        })
-      );
-    }, 60000);
+          // LOGIC FIX: If user timed out (went offline), turn off bracelet status locally
+          const braceletOn = online ? u.braceletOn : false;
+
+          if (u.online !== online || u.braceletOn !== braceletOn) {
+            hasChanges = true;
+            return { ...u, online, braceletOn };
+          }
+          return u;
+        });
+        return hasChanges ? updatedUsers : current;
+      });
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
