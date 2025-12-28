@@ -5,7 +5,7 @@ import './UserProfile.css';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { createCustomIcon } from '../utils/mapHelpers';
 
 // Fix for Leaflet icons
@@ -40,11 +40,14 @@ const UserProfile = () => {
   }
 
 
-  const isOnline = person.braceletOn;
+  // LOGIC FIX: Use person.online for connection status. 
+  // person.braceletOn is now synced with online status via useUsers hook.
+  const isOnline = person.online; 
+  const isBraceletOn = person.braceletOn;
   const batteryLevel = person.battery;
   const userPosition =
-    person.location && Array.isArray(person.location)
-      ? person.location
+    person.position && Array.isArray(person.position)
+      ? person.position
       : [14.5995, 120.9842]; // ✅ fallback to Manila if null
 
   const getBatteryColor = (level) => {
@@ -78,11 +81,11 @@ const UserProfile = () => {
           <h1 className="profile-name">{person.name}</h1>
           <div
             className={`profile-status-badge ${
-              isOnline ? 'online' : 'offline'
+              isBraceletOn ? 'online' : 'offline'
             }`}
           >
             <div className="status-dot"></div>
-            {isOnline ? 'Bracelet Online' : 'Bracelet Offline'}
+            {isBraceletOn ? 'Bracelet Online' : 'Bracelet Offline'}
           </div>
         </section>
 
@@ -132,7 +135,7 @@ const UserProfile = () => {
             <div className="profile-map-wrapper">
               <MapContainer
                 center={userPosition}
-                zoom={15}
+                zoom={18}
                 scrollWheelZoom={false}
                 style={{ width: '100%', height: '100%' }}
               >

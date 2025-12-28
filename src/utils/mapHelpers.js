@@ -30,16 +30,20 @@ export function parseLocation(locationField) {
   if (Array.isArray(locationField) && locationField.length >= 2) {
     return [locationField[0], locationField[1]];
   }
-  return [14.5921, 120.9755];
+  return null;
 }
 
 // Build a user object merged with deviceStatus data
 export function buildUserWithDevice(userDoc, deviceMap) {
   const userData = userDoc.data();
   const deviceData = deviceMap.get(userDoc.id) || {};
-  const location = parseLocation(deviceData.location);
+  const location = parseLocation(deviceData.location) || parseLocation(deviceData);
   const lastSeenDate = parseFirestoreDate(deviceData.lastSeen);
   const online = isUserOnline(lastSeenDate);
+
+  // LOGIC FIX: If offline, force braceletOn to false
+  const braceletOn = online ? Boolean(deviceData.isBraceletOn ?? false) : false;
+
   return {
     id: userDoc.id,
     name: userData.name || 'Unnamed User',
@@ -47,7 +51,7 @@ export function buildUserWithDevice(userDoc, deviceMap) {
       userData.avatar ||
       'https://i.pinimg.com/originals/98/1d/6b/981d6b2e0ccb5e968a0618c8d47671da.jpg',
     battery: Number(deviceData.battery ?? 0),
-    braceletOn: Boolean(deviceData.isBraceletOn ?? false),
+    braceletOn: braceletOn,
     pulseRate: deviceData.pulseRate ?? null,
     lastSeen: lastSeenDate,
     sos: (deviceData.sos && (deviceData.sos.active ?? deviceData.sos)) || false,
@@ -72,7 +76,7 @@ export const createCustomIcon = (person) =>
   });
 
 // Helper to determine if user is online based on lastSeen
-export function isUserOnline(lastSeen, thresholdMinutes = 5) {
+export function isUserOnline(lastSeen, thresholdMinutes = 2) {
   if (!lastSeen) return false;
   return new Date().getTime() - lastSeen.getTime() < thresholdMinutes * 60 * 1000;
 }

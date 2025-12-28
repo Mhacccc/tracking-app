@@ -63,17 +63,20 @@ export function useUsers() {
                   online: false,
                 };
               }
-              const loc = mapHelpers.parseLocation(dd.location);
+              const loc = mapHelpers.parseLocation(dd.location) || mapHelpers.parseLocation(dd);
               const lastSeen = mapHelpers.parseFirestoreDate(dd.lastSeen);
+              const online = mapHelpers.isUserOnline(lastSeen);
+
               return {
                 ...u,
                 battery: Number(dd.battery ?? u.battery),
-                braceletOn: Boolean(dd.isBraceletOn ?? u.braceletOn),
+                // LOGIC FIX: If offline, force braceletOn to false
+                braceletOn: online ? Boolean(dd.isBraceletOn ?? u.braceletOn) : false,
                 pulseRate: dd.pulseRate ?? u.pulseRate,
                 lastSeen,
                 sos: (dd.sos && (dd.sos.active ?? dd.sos)) || false,
                 position: loc || u.position, // Keep old position if new one is null
-                online: mapHelpers.isUserOnline(lastSeen),
+                online: online,
               };
             })
           );
@@ -99,10 +102,15 @@ export function useUsers() {
   useEffect(() => {
     const interval = setInterval(() => {
       setUsers((current) =>
-        current.map((u) => ({
-          ...u,
-          online: mapHelpers.isUserOnline(u.lastSeen),
-        }))
+        current.map((u) => {
+          const online = mapHelpers.isUserOnline(u.lastSeen);
+          return {
+            ...u,
+            online: online,
+            // LOGIC FIX: If user timed out (went offline), turn off bracelet status locally
+            braceletOn: online ? u.braceletOn : false,
+          };
+        })
       );
     }, 60000);
     return () => clearInterval(interval);

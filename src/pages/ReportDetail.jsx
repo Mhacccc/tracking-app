@@ -95,9 +95,7 @@ const ReportDetail = () => {
               <DetailRow label="Location" value={incident.location} />
               <DetailRow label="Pulse Reading" value={incident.pulse} valueColor={pulseColor} />
               <DetailRow label="Family Notified" value={incident.familyNotified} />
-              <DetailRow label="Police Notified" value={incident.policeNotified} />
               <DetailRow label="Bracelet Status" value={incident.braceletStatus} />
-              <DetailRow label="Response Status" value={incident.responseStatus} valueColor={statusColor} />
             </div>
           </section>
 

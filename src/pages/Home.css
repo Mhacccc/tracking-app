@@ -81,7 +81,7 @@ html, body {
 }
 
 .marker-status.offline {
-  background-color: #f44336;
+  background-color: red;
 }
 
 /* Custom popup styles */
