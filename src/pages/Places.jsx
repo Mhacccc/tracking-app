@@ -8,7 +8,7 @@ import "./Places.css";
 import { useState, useRef, useEffect } from "react";
 import L from "leaflet";
 import * as mapHelpers from "../utils/mapHelpers";
-import { useUsers } from "../hooks/useUsers";
+import { useBraceletUsers } from "../hooks/useUsers";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -27,7 +27,7 @@ const GEOFENCE_ALERTS_KEY = "pingme_geofence_alerts";
 
 const Places = () => {
   const [map, setMap] = useState(null);
-  const { users, loading } = useUsers();
+  const { braceletUsers, loading } = useBraceletUsers();
   const [activeAlerts, setActiveAlerts] = useState([]);
   const [geofences, setGeofences] = useState(() => {
     const savedZones = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -49,7 +49,7 @@ const Places = () => {
     const existingAlerts = localStorage.getItem(GEOFENCE_ALERTS_KEY);
     const parsedAlerts = existingAlerts ? JSON.parse(existingAlerts) : [];
 
-    users.forEach((user) => {
+    braceletUsers.forEach((user) => {
       if (!Array.isArray(user.position) || user.position.length !== 2) return;
 
       const userLatLng = L.latLng(user.position[0], user.position[1]);
@@ -99,7 +99,7 @@ const Places = () => {
     }
 
     setActiveAlerts(currentAlerts);
-  }, [users, geofences]);
+  }, [braceletUsers, geofences]);
 
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(geofences));
@@ -188,7 +188,7 @@ const Places = () => {
   if (loading) return <div className="loading">Loading map and users...</div>;
   
     // Find a user with a valid position to center the map on.
-  const initialCenterUser = users.find(u => u.position && u.position.length === 2);
+  const initialCenterUser = braceletUsers.find(u => u.position && u.position.length === 2);
   const initialCenter = initialCenterUser ? initialCenterUser.position : [14.5921, 120.9755];
 
 
@@ -257,7 +257,7 @@ const Places = () => {
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
           {/* Render real user markers */}
-          {users.map((user) => 
+          {braceletUsers.map((user) => 
             user.position && (
             <Marker
               key={user.id}

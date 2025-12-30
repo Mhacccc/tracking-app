@@ -4,8 +4,8 @@ import { collection, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import * as mapHelpers from '../utils/mapHelpers';
 
-export function useUsers() {
-  const [users, setUsers] = useState([]);
+export function useBraceletUsers() {
+  const [braceletUsers, setBraceletUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -16,7 +16,7 @@ export function useUsers() {
       try {
         setLoading(true);
         const [usersSnap, deviceSnap] = await Promise.all([
-          getDocs(collection(db, 'users')),
+          getDocs(collection(db, 'braceletUsers')),
           getDocs(collection(db, 'deviceStatus')),
         ]);
 
@@ -28,7 +28,7 @@ export function useUsers() {
         });
 
         const merged = usersSnap.docs.map((u) => mapHelpers.buildUserWithDevice(u, deviceMap));
-        setUsers(merged);
+        setBraceletUsers(merged);
         setLoading(false);
 
         unsubDevice = onSnapshot(collection(db, 'deviceStatus'), (snapshot) => {
@@ -47,7 +47,7 @@ export function useUsers() {
 
           if (updatesByUser.size === 0) return;
 
-          setUsers((current) =>
+          setBraceletUsers((current) =>
             current.map((u) => {
               if (!updatesByUser.has(u.id)) return u;
               const dd = updatesByUser.get(u.id);
@@ -101,7 +101,7 @@ export function useUsers() {
   // Periodically refresh online status (every minute) to mark users as offline if data is stale
   useEffect(() => {
     const interval = setInterval(() => {
-      setUsers((current) => {
+      setBraceletUsers((current) => {
         let hasChanges = false;
         const updatedUsers = current.map((u) => {
           const online = mapHelpers.isUserOnline(u.lastSeen);
@@ -120,5 +120,5 @@ export function useUsers() {
     return () => clearInterval(interval);
   }, []);
 
-  return { users, loading, error };
+  return { braceletUsers, loading, error };
 }

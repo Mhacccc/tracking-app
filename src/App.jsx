@@ -1,4 +1,8 @@
 import { Routes, Route} from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import PrivateRoute from "./components/PrivateRoute";
+import Login from "./context/Login";
+import Signup from "./context/Signup";
 import AppLayout from "./layouts/AppLayout";
 import People from "./pages/People";
 import UserProfile from "./pages/UserProfile";
@@ -16,17 +20,26 @@ function App() {
 
   return (
     <>
-      <Routes>
-        <Route path="/" element={<AppLayout/>}>
-          <Route index path="/" element={<Home />} />
-          <Route path="people" element={<People />} />
-          <Route path="report" element={<Report />} />
-          <Route path="report/:incidentId" element={<ReportDetail />} /> 
-          <Route path="notifications" element={<NotificationsPage />} />
-          <Route path="places" element={<Places />} />
-          <Route path="userProfile/:userId" element={<UserProfile/>} />
-        </Route>
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+
+          {/* Protected Routes */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/" element={<AppLayout/>}>
+              <Route index element={<Home />} />
+              <Route path="people" element={<People />} />
+              <Route path="report" element={<Report />} />
+              <Route path="report/:incidentId" element={<ReportDetail />} /> 
+              <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="places" element={<Places />} />
+              <Route path="userProfile/:userId" element={<UserProfile/>} />
+            </Route>
+          </Route>
+        </Routes>
+      </AuthProvider>
     </>
 
   );

@@ -6,19 +6,19 @@ import './Home.css';
 import { Link } from 'react-router-dom';
 import * as mapHelpers from '../utils/mapHelpers';
 import { reverseGeocode } from '../utils/geocode';
-import { useUsers } from '../hooks/useUsers';
+import { useBraceletUsers } from '../hooks/useUsers';
 
 /* ---------------------- Component ---------------------- */
 
 function Home() {
   const [center, setCenter] = useState([14.5921, 120.9755]);
-  const { users, loading } = useUsers();
+  const { braceletUsers, loading } = useBraceletUsers();
   const [addressCache, setAddressCache] = useState({});
 
   // Effect to re-center the map when an online user's location changes
   useEffect(() => {
     // Find the most recently updated user who is online
-    const latestOnlineUser = users
+    const latestOnlineUser = braceletUsers
       .filter(u => u.online && u.lastSeen)
       .sort((a, b) => b.lastSeen - a.lastSeen)[0];
 
@@ -28,7 +28,7 @@ function Home() {
         setCenter([lat, lng]);
       }
     }
-  }, [users]);
+  }, [braceletUsers]);
 
 
   // Fetch address for a user if not already cached
@@ -46,15 +46,15 @@ function Home() {
 
   const getInitialCenter = () => {
     // First, try to find an online user with SOS
-    const sosUser = users.find(u => u.sos && u.online);
+    const sosUser = braceletUsers.find(u => u.sos && u.online);
     if (sosUser?.position) return sosUser.position;
 
     // Then, try to find any online user
-    const onlineUser = users.find(u => u.online);
+    const onlineUser = braceletUsers.find(u => u.online);
     if (onlineUser?.position) return onlineUser.position;
 
     // Finally, try to find any user with a valid position
-    const anyUser = users.find(u => 
+    const anyUser = braceletUsers.find(u => 
       Array.isArray(u.position) && 
       u.position.length === 2 && 
       !isNaN(u.position[0]) && 
@@ -78,7 +78,7 @@ function Home() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          {users.map((person) => {
+          {braceletUsers.map((person) => {
             // Trigger address fetch on render if not cached
             if (!addressCache[person.id]) fetchAddress(person);
             return (
