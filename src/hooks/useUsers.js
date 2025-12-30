@@ -1,10 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { collection, getDocs, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, onSnapshot, doc, getDoc, query, where, documentId } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import * as mapHelpers from '../utils/mapHelpers';
+import { useAuth } from '../context/AuthContext';
 
 export function useBraceletUsers() {
+  const { currentUser } = useAuth();
   const [braceletUsers, setBraceletUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,10 +15,41 @@ export function useBraceletUsers() {
     let unsubDevice = null;
 
     async function initialLoad() {
+      // If no user is logged in, do nothing.
+      if (!currentUser) {
+        setBraceletUsers([]);
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
+
+        // 1. Get linked bracelet IDs from the current appUser's document
+        const appUserRef = doc(db, 'appUsers', currentUser.uid);
+        const appUserSnap = await getDoc(appUserRef);
+
+        if (!appUserSnap.exists()) {
+          console.warn("App user data not found for UID:", currentUser.uid);
+          setBraceletUsers([]);
+          setLoading(false);
+          return;
+        }
+
+        const linkedBraceletsID = appUserSnap.data()?.linkedBraceletsID;
+
+        // 2. If the user has no linked bracelets, return an empty list.
+        if (!linkedBraceletsID || linkedBraceletsID.length === 0) {
+          setBraceletUsers([]);
+          setLoading(false);
+          return;
+        }
+
+        // 3. Fetch only the braceletUsers whose IDs are in the linkedBraceletsID array.
+        const usersQuery = query(collection(db, 'braceletUsers'), where(documentId(), 'in', linkedBraceletsID));
+
         const [usersSnap, deviceSnap] = await Promise.all([
-          getDocs(collection(db, 'braceletUsers')),
+          getDocs(usersQuery),
           getDocs(collection(db, 'deviceStatus')),
         ]);
 
@@ -81,12 +114,12 @@ export function useBraceletUsers() {
             })
           );
         }, (err) => {
-          console.error('Error in device status listener:', err);
-          setError('Lost connection to device status updates.');
+          console.error("Error in device status listener:", err);
+          setError("Lost connection to device status updates.");
         });
       } catch (err) {
-        console.error('Error initial loading users/deviceStatus:', err);
-        setError('Failed to load initial data.');
+        console.error("Error loading linked bracelet users:", err);
+        setError("Failed to load bracelet data.");
         setLoading(false);
       }
     }
@@ -96,7 +129,7 @@ export function useBraceletUsers() {
     return () => {
       if (unsubDevice) unsubDevice();
     };
-  }, []);
+  }, [currentUser]);
 
   // Periodically refresh online status (every minute) to mark users as offline if data is stale
   useEffect(() => {
