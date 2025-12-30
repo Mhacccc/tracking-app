@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import './TopBar.css';
 import { Bell, Menu } from 'lucide-react';
 import logo from '../assets/logo.png';
-import avatar from '../assets/default.jpg'; 
+import avatar from '../assets/red.webp'; 
+import ProfileModal from './ProfileModal';
 
 const TopBar = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -39,6 +40,11 @@ const TopBar = () => {
           </button>
         </div>
       </header>
+
+      <ProfileModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+      />
 
     </>
   );

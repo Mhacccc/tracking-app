@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useBraceletUsers } from '../hooks/useUsers';
 import { getAuth } from "firebase/auth";
-import { collection, addDoc, doc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, arrayUnion} from "firebase/firestore";
 import { db } from "../config/firebaseConfig";
 import { Plus, X } from "lucide-react";
 
@@ -21,6 +21,11 @@ function People() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newBraceletName, setNewBraceletName] = useState('');
+  const [newBraceletEmail, setNewBraceletEmail] = useState('');
+  const [newContactNo, setNewContactNo] = useState('');
+  const [emergencyContacts, setEmergencyContacts] = useState([]);
+  const [emergencyNameInput, setEmergencyNameInput] = useState('');
+  const [emergencyContactInput, setEmergencyContactInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const sortAndFilterUsers = (users, query) => {
@@ -60,13 +65,13 @@ function People() {
       const newBraceletData = {
         name: newBraceletName,
         ownerAppUserId: user.uid,
-        createdAt: serverTimestamp(),
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${newBraceletName}`, // Generate random avatar based on name
-        battery: 100,
-        online: false,
-        braceletOn: false,
-        sos: false,
-        position: null
+        email: newBraceletEmail || null,
+        "contactNo#": newContactNo || null,
+        emergencyContacts: [{
+          name: emergencyNameInput,
+          contactNo: emergencyContactInput
+        }],
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${newBraceletName}`,
       };
 
       const docRef = await addDoc(collection(db, 'braceletUsers'), newBraceletData);
@@ -80,6 +85,11 @@ function People() {
 
       alert("Bracelet added successfully!");
       setNewBraceletName('');
+      setNewBraceletEmail('');
+      setNewContactNo('');
+      setEmergencyContacts([]);
+      setEmergencyNameInput('');
+      setEmergencyContactInput('');
       setIsModalOpen(false);
       
       // Reload to fetch the new list (since useBraceletUsers uses getDocs once)
@@ -100,35 +110,14 @@ function People() {
     <main className="app-main page-frame">
       <div className="search-container" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
         <div style={{ position: 'relative', flex: 1 }}>
-          <input
-            type="text"
-            placeholder="Search Name"
-            className="search-input"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ width: '100%' }}
-          />
+          <input type="text" placeholder="Search Name" className="search-input" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ width: '100%' }}/>
           <div className="search-icon">
             <SearchIcon />
           </div>
         </div>
         
         {/* Add Bracelet Button */}
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          style={{
-            backgroundColor: '#000', 
-            color: '#fff', 
-            border: 'none', 
-            borderRadius: '50%', 
-            width: '40px', 
-            height: '40px', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            cursor: 'pointer'
-          }}
-        >
+        <button onClick={() => setIsModalOpen(true)}style={{backgroundColor: '#000', color: '#fff', border: 'none', borderRadius: '50%', width: '40px',  height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center',cursor: 'pointer'}}>
           <Plus size={24} />
         </button>
       </div>
@@ -140,22 +129,48 @@ function People() {
             <button onClick={() => setIsModalOpen(false)} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', cursor: 'pointer' }}><X size={24} /></button>
             <h2 style={{ marginTop: 0, marginBottom: '15px' }}>Add New Bracelet</h2>
             <form onSubmit={handleAddBracelet}>
-              <div style={{ marginBottom: '15px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Name</label>
-                <input 
-                  type="text" 
-                  value={newBraceletName} 
-                  onChange={(e) => setNewBraceletName(e.target.value)}
-                  placeholder="e.g. Grandma"
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box' }}
-                  required
-                />
+                <input type="text" value={newBraceletName} onChange={(e) => setNewBraceletName(e.target.value)} placeholder="e.g. Sister" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box' }} required />
               </div>
-              <button 
-                type="submit" 
-                disabled={isSubmitting}
-                style={{ width: '100%', padding: '12px', background: '#000', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}
-              >
+
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Email</label>
+                <input type="email" value={newBraceletEmail} onChange={(e) => setNewBraceletEmail(e.target.value)} placeholder="contact@example.com" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }} />
+              </div>
+
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Contact Number</label>
+                <input type="tel" value={newContactNo} onChange={(e) => setNewContactNo(e.target.value)} placeholder="e.g. 09666045678" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }} />
+              </div>
+
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Emergency Contacts</label>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                  <input value={emergencyNameInput} onChange={(e) => setEmergencyNameInput(e.target.value)} placeholder="Name" style={{ flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid #ccc' }} />
+                  <input value={emergencyContactInput} onChange={(e) => setEmergencyContactInput(e.target.value)} placeholder="Contact No." style={{ flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid #ccc' }} />
+                  <button type="button" onClick={() => {
+                    const name = emergencyNameInput.trim();
+                    const contact = emergencyContactInput.trim();
+                    if (!name || !contact) return;
+                    setEmergencyContacts((s) => [...s, { name, contactNo: contact }]);
+                    setEmergencyNameInput('');
+                    setEmergencyContactInput('');
+                  }} style={{ padding: '8px 10px', borderRadius: '6px', background: '#000', color: '#fff', border: 'none', cursor: 'pointer' }}>Add</button>
+                </div>
+                {emergencyContacts.length > 0 && (
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {emergencyContacts.map((ec, idx) => (
+                      <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0' }}>
+                        <div style={{ fontSize: '14px' }}>{ec.name} — {ec.contactNo}</div>
+                        <button type="button" onClick={() => setEmergencyContacts((s) => s.filter((_, i) => i !== idx))} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={16} /></button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <button type="submit" disabled={isSubmitting} style={{ width: '100%', padding: '12px', background: '#000', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
                 {isSubmitting ? 'Adding...' : 'Add Bracelet'}
               </button>
             </form>
