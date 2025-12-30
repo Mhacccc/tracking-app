@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useBraceletUsers } from '../hooks/useUsers';
 import { getAuth } from "firebase/auth";
-import { collection, addDoc, doc, updateDoc, arrayUnion} from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { db } from "../config/firebaseConfig";
 import { Plus, X } from "lucide-react";
 
@@ -62,7 +62,7 @@ function People() {
 
       // 1. Create the braceletUser document
       // This matches your requested structure with ownerAppUserId
-      const newBraceletData = {
+      const newBraceletUser = {
         name: newBraceletName,
         ownerAppUserId: user.uid,
         email: newBraceletEmail || null,
@@ -74,7 +74,24 @@ function People() {
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${newBraceletName}`,
       };
 
-      const docRef = await addDoc(collection(db, 'braceletUsers'), newBraceletData);
+      const docRef = await addDoc(collection(db, 'braceletUsers'), newBraceletUser);
+
+      // Create initial deviceStatus document for this bracelet user
+      const deviceData = {
+        battery: 100,
+        isBraceletOn: true,
+        lastSeen: serverTimestamp(),
+        location: [0, 0],
+        pulseRate: null,
+        sos: { active: false, timestamp: null },
+        userId: docRef.id,
+      };
+
+      try {
+        await addDoc(collection(db, 'deviceStatus'), deviceData);
+      } catch (devErr) {
+        console.error('Failed to create deviceStatus for new bracelet:', devErr);
+      }
 
       // 2. Link to the appUser
       // This adds the new ID to the linkedBraceletsID array
