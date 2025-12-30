@@ -52,7 +52,6 @@ function Sidebar() {
         <SidebarLink to="/places" icon={Map} label="Places" />
         <SidebarLink to="/report" icon={FileText} label="Report" />
         
-        <SidebarLink to="/profile" icon={User} label="My Profile" />
       </div>
 
       <div className="sidebar-footer">

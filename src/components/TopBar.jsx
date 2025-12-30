@@ -1,21 +1,17 @@
 // src/components/TopBar.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './TopBar.css';
-import { Bell, MessageCircle, Users, Menu } from 'lucide-react';
-import ProfileModal from './ProfileModal';
-import CirclesModal from './CirclesModal'; 
+import { Bell, Menu } from 'lucide-react';
 import logo from '../assets/logo.png';
 import avatar from '../assets/profile.png'; 
 
 const TopBar = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [isCirclesModalOpen, setIsCirclesModalOpen] = useState(false);
   const navigate = useNavigate();
 
   // --- MODIFIED: Update handlers ---
   const handleOpenNotifications = () => navigate('/notifications');
-  const handleOpenCircles = () => setIsCirclesModalOpen(true);
 
   return (
     <>
@@ -37,9 +33,6 @@ const TopBar = () => {
             <Bell size={22} />
           </button>
           {/* This button now works */}
-          <button className="topbar-icon-btn" onClick={handleOpenCircles}>
-            <Users size={22} />
-          </button>
           
           <button className="topbar-desktop-profile-btn" onClick={() => setIsProfileModalOpen(true)}>
             <img src={avatar} alt="Profile" />
@@ -47,15 +40,6 @@ const TopBar = () => {
         </div>
       </header>
 
-      {/* Modals */}
-      <ProfileModal 
-        isOpen={isProfileModalOpen} 
-        onClose={() => setIsProfileModalOpen(false)} 
-      />
-      <CirclesModal 
-        isOpen={isCirclesModalOpen} 
-        onClose={() => setIsCirclesModalOpen(false)} 
-      />
     </>
   );
 };
