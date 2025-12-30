@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import './TopBar.css';
 import { Bell, Menu } from 'lucide-react';
 import logo from '../assets/logo.png';
-import avatar from '../assets/profile.png'; 
+import avatar from '../assets/default.jpg'; 
 
 const TopBar = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);

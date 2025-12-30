@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'; // 1
 import { Home, Users, Map, FileText, User, LogOut } from 'lucide-react';
 import './Sidebar.css';
 import logo from '../assets/logo.png'; 
+import { useAuth } from '../context/AuthContext';
 
 
 // 2. Modify SidebarLink helper
@@ -30,11 +31,16 @@ const SidebarLink = ({ to, icon: Icon, label }) => {
 
 function Sidebar() {
 
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error("Failed to log out", error);
+    }
   };
 
   return (
