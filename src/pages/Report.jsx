@@ -1,15 +1,14 @@
-// src/pages/app/Report.jsx
-import { ChevronRight, ShieldAlert, BatteryWarning, MapPin } from 'lucide-react'; 
-import { Link, useNavigate } from 'react-router-dom';
-import './Report.css'; 
+import { useState } from 'react';
+import { ChevronRight, ShieldAlert } from 'lucide-react';
+import ReportDetailModal from '../components/ReportDetailModal';
+import './Report.css';
 
-// --- MODIFIED: Added 'export' so other files can use this mock data ---
-// --- VIBE-CODE: Filtered to ONLY show major "Panic Button" incidents ---
+// Existing incidentData...
 export const incidentData = [
-  { 
-    id: 4, 
-    type: 'Panic Button', 
-    date: 'April 25, 2025', 
+  {
+    id: 4,
+    type: 'Panic Button',
+    date: 'April 25, 2025',
     time: '03:15 PM',
     location: 'TUP Library, Manila',
     user: { name: 'Sister', avatar: 'https://i.pravatar.cc/150?u=sister' },
@@ -19,10 +18,10 @@ export const incidentData = [
     braceletStatus: 'On',
     responseStatus: 'Alert Active',
   },
-  { 
-    id: 1, 
-    type: 'Panic Button', 
-    date: 'April 24, 2025', 
+  {
+    id: 1,
+    type: 'Panic Button',
+    date: 'April 24, 2025',
     time: '10:03 AM',
     location: 'South Road Drive, Kalaw Ave, Ext, Manila',
     user: { name: 'Mary', avatar: 'https://i.pravatar.cc/150?u=mary' },
@@ -36,10 +35,14 @@ export const incidentData = [
 ];
 
 const Report = () => {
-  const navigate = useNavigate();
+  const [selectedIncident, setSelectedIncident] = useState(null);
 
   const handleRowClick = (incident) => {
-    navigate(`/report/${incident.id}`, { state: { incidentData: incident } });
+    setSelectedIncident(incident);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedIncident(null);
   };
 
   return (
@@ -50,46 +53,50 @@ const Report = () => {
             const IconComponent = incident.displayStatus.icon;
 
             return (
-              <li key={incident.id} className="incident-item">
-                <Link
-                  to={`/report/${incident.id}`}
-                  state={{ incidentData: incident }}
-                  className="incident-link-wrapper"
-                  role="link"
-                  tabIndex={0}
-                  onClick={(e) => {
+              <li
+                key={incident.id}
+                className="incident-item"
+                role="button"
+                tabIndex={0}
+                onClick={() => handleRowClick(incident)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
                     handleRowClick(incident);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleRowClick(incident);
-                    }
-                  }}
-                >
-                  <div className={`incident-icon-wrapper ${incident.displayStatus.color}`}>
-                    <IconComponent size={20} />
-                  </div>
+                  }
+                }}
+              >
+                <div className="incident-link-wrapper">
+                    <div className={`incident-icon-wrapper ${incident.displayStatus.color}`}>
+                        <IconComponent size={20} />
+                    </div>
 
-                  <div className="incident-details">
-                    <p className={`incident-type ${incident.displayStatus.color}`}>{incident.displayStatus.text}</p>
-                    <p className="incident-date-location">
-                      {incident.date} &bull; {incident.location}
-                    </p>
-                  </div>
+                    <div className="incident-details">
+                        <p className={`incident-type ${incident.displayStatus.color}`}>{incident.displayStatus.text}</p>
+                        <p className="incident-date-location">
+                        {incident.date} &bull; {incident.location}
+                        </p>
+                    </div>
 
-                  <div className="incident-time-wrapper">
-                      <span className="incident-date-right">
-                          {incident.time}
-                      </span>
-                      <ChevronRight size={20} className="chevron-icon" />
-                  </div>
-                </Link>
+                    <div className="incident-time-wrapper">
+                        <span className="incident-date-right">
+                            {incident.time}
+                        </span>
+                        <ChevronRight size={20} className="chevron-icon" />
+                    </div>
+                </div>
               </li>
             );
           })}
         </ul>
       </main>
+
+      {selectedIncident && (
+        <ReportDetailModal
+          incident={selectedIncident}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 };

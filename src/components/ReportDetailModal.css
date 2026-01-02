@@ -1,0 +1,179 @@
+.report-detail-modal-body {
+    padding: 0 24px 24px;
+}
+
+.report-detail-modal-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.report-detail-modal-label {
+    color: #555;
+}
+
+.report-detail-modal-value {
+    color: #111;
+    font-weight: 500;
+}
+
+.red-text {
+    color: #ef4444;
+}
+
+.green-text {
+    color: #22c55e;
+}
+
+
+/* Re-using existing modal styles from other components for consistency */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 500px;
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-header h2 {
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.modal-close-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.modal-close-button:hover {
+    background-color: #f3f4f6;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-family: inherit;
+}
+
+.modal-create-button {
+    background-color: #3b82f6;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.modal-create-button:hover {
+    background-color: #2563eb;
+}
+
+/* Styles from UserProfile.css that are needed */
+.profile-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+    text-align: center;
+}
+
+.profile-avatar-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.profile-avatar-img {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.profile-name {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.profile-section {
+    padding: 0 24px 24px;
+}
+
+.profile-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.mark-safe-button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background-color: #22c55e; /* green-500 */
+  color: white;
+  font-weight: 500;
+  text-align: center;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 16px;
+}
+
+.mark-safe-button:hover {
+  background-color: #16a34a; /* green-600 */
+}

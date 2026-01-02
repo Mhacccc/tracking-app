@@ -9,7 +9,6 @@ import UserProfile from "./pages/UserProfile";
 import Places from "./pages/Places";
 import NotificationsPage from "./pages/NotificationsPage";
 import Report from "./pages/Report";
-import ReportDetail from "./pages/ReportDetail";
 import Home from "./pages/Home"
 import "./App.css"
 
@@ -32,7 +31,6 @@ function App() {
               <Route index element={<Home />} />
               <Route path="people" element={<People />} />
               <Route path="report" element={<Report />} />
-              <Route path="report/:incidentId" element={<ReportDetail />} /> 
               <Route path="notifications" element={<NotificationsPage />} />
               <Route path="places" element={<Places />} />
               <Route path="userProfile/:userId" element={<UserProfile/>} />
