@@ -16,7 +16,6 @@ export const incidentData = [
     pulse: '122 bpm',
     familyNotified: 'April 25, 03:16 PM',
     braceletStatus: 'On',
-    responseStatus: 'Alert Active',
   },
   {
     id: 1,
@@ -29,9 +28,7 @@ export const incidentData = [
     pulse: '115 bpm',
     familyNotified: 'April 24, 10:04 AM',
     braceletStatus: 'On',
-    responseStatus: 'Marked Safe',
   },
-  // --- REMOVED Low Battery and Geofence alerts from this page ---
 ];
 
 const Report = () => {
@@ -51,7 +48,7 @@ const Report = () => {
         <ul className="incident-list" aria-label="Incident list">
           {incidentData.map(incident => {
             const IconComponent = incident.displayStatus.icon;
-
+            
             return (
               <li
                 key={incident.id}

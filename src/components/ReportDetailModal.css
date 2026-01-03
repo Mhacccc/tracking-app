@@ -18,14 +18,6 @@
     font-weight: 500;
 }
 
-.red-text {
-    color: #ef4444;
-}
-
-.green-text {
-    color: #22c55e;
-}
-
 
 /* Re-using existing modal styles from other components for consistency */
 .modal-backdrop {
@@ -159,21 +151,3 @@
     border-bottom: 1px solid #eee;
 }
 
-.mark-safe-button {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  background-color: #22c55e; /* green-500 */
-  color: white;
-  font-weight: 500;
-  text-align: center;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  margin-top: 16px;
-}
-
-.mark-safe-button:hover {
-  background-color: #16a34a; /* green-600 */
-}
